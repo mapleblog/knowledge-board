@@ -356,6 +356,89 @@ body {
   box-shadow: 0 0 8px rgba(79, 70, 229, 0.4);
 }
 
+/* ---- Auth pages ---- */
+.flow .auth-panel {
+  max-width: 360px;
+  margin: 60px auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 32px 28px;
+  box-shadow: 0 30px 60px -40px rgba(20, 24, 60, 0.5);
+}
+.flow .auth-panel h1 {
+  margin: 18px 0 4px;
+  font-size: 21px;
+  font-weight: 700;
+}
+.flow .auth-panel .tag {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.flow .auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.flow .field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.flow .field input {
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+.flow .field input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+.flow .auth-form .btn {
+  margin-left: 0;
+  margin-top: 4px;
+}
+.flow .auth-error {
+  margin: 0;
+  font-size: 12px;
+  color: #ef4444;
+}
+.flow .auth-message {
+  margin: 0;
+  font-size: 12px;
+  color: var(--accent);
+}
+.flow .auth-switch {
+  margin: 18px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+.flow .auth-switch a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ---- Session menu (top-bar logout) ---- */
+.flow .session-menu {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.flow .session-email {
+  font-size: 12px;
+  color: var(--muted);
+}
+
 .flow .thumb {
   width: 52px;
   height: 52px;

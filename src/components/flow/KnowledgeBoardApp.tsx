@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { Attachment, BoardWithCards, Card, CardStatus } from "@/lib/types";
 import BoardList from "./BoardList";
 import TimelinePath from "./TimelinePath";
+import SessionMenu from "@/components/auth/SessionMenu";
 
 type PathCard = Card & { attachments: Attachment[] };
 
@@ -14,8 +15,10 @@ type PathCard = Card & { attachments: Attachment[] };
  */
 export default function KnowledgeBoardApp({
   initialBoards,
+  userEmail,
 }: {
   initialBoards: BoardWithCards[];
+  userEmail?: string;
 }) {
   const [boards, setBoards] = useState(initialBoards);
   const [activeId, setActiveId] = useState(initialBoards[0]?.id ?? "");
@@ -81,7 +84,11 @@ export default function KnowledgeBoardApp({
           <button className="btn" onClick={handleNewBoard}>
             + New board
           </button>
-          <button className="av" aria-label="Account" />
+          {userEmail ? (
+            <SessionMenu email={userEmail} />
+          ) : (
+            <button className="av" aria-label="Account" />
+          )}
         </div>
 
         <div className="cols">
