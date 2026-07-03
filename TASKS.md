@@ -54,25 +54,26 @@ Replace seed boards with the user's real, persisted boards.
 
 The core "learning path" loop, persisted.
 
-- [ ] Fetch cards for a board ordered by `order_index`
-- [ ] Create card: title (required) + optional description + URL; appended to end
-- [ ] Card detail view (modal/side panel): full description, clickable URL (new tab)
-- [ ] Edit card
-- [ ] Delete card with confirmation
-- [ ] Persist drag-reorder via fractional `order_index` (single-row write per move)
-- [ ] Optimistic UI on reorder; debounced write; survives page reload
+- [x] Fetch cards for a board ordered by `order_index`
+- [x] Create card: title (required) + optional description + URL; appended to end
+- [x] Card detail view (modal/side panel): full description, clickable URL (new tab)
+- [x] Edit card
+- [x] Delete card with confirmation
+- [x] Persist drag-reorder via fractional `order_index` (single-row write per move)
+- [x] Optimistic UI on reorder; debounced write; survives page reload
 - [ ] Verify reorder works on touch (phone-sized viewport)
 
 ---
 
 ## Phase 4 — Attachments (PRD §2 Attachments, §4 Storage)
 
-- [ ] Signed upload to Supabase Storage from the card form
-- [ ] Client-side validation: png/jpg/webp/pdf, ≤ 5MB, clear rejection errors
-- [ ] Server/storage-rule validation (authoritative) for type + size
-- [ ] Persist `attachments` row (path, name, size, mime)
-- [ ] Attachment preview (images) + download link in card detail view
-- [ ] Delete attachment (and remove storage object)
+- [x] Signed upload to Supabase Storage from the card form
+- [x] Client-side validation: png/jpg/webp/pdf, ≤ 5MB, clear rejection errors
+- [x] Server/storage-rule validation (authoritative) for type + size
+- [x] Persist `attachments` row (path, name, size, mime)
+- [x] Attachment preview (images) + download link in card detail view
+- [x] Delete attachment (and remove storage object)
+- [x] Create private `attachments` Storage bucket (5MB limit, png/jpg/webp/pdf) + apply storage RLS policies
 
 ---
 

@@ -5,10 +5,15 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Attachment, Card } from "@/lib/types";
 import { linkLabel, statusPill } from "@/lib/board";
 
+type PathCard = Card & { attachments: Attachment[] };
+
 type StepCardProps = {
-  card: Card & { attachments: Attachment[] };
+  card: PathCard;
   /** Toggle this card between done / not-done (fills the timeline node). */
   onToggleDone: (id: string) => void;
+  onOpenDetail: (card: PathCard) => void;
+  onEdit: (card: PathCard) => void;
+  onDelete: (card: PathCard) => void;
 };
 
 /**
@@ -16,7 +21,13 @@ type StepCardProps = {
  * draggable knowledge card. The grip (⋮⋮) is the drag handle so the rest of
  * the card stays clickable.
  */
-export default function StepCard({ card, onToggleDone }: StepCardProps) {
+export default function StepCard({
+  card,
+  onToggleDone,
+  onOpenDetail,
+  onEdit,
+  onDelete,
+}: StepCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: card.id });
 
@@ -34,18 +45,44 @@ export default function StepCard({ card, onToggleDone }: StepCardProps) {
       className={`step${card.status === "done" ? " done" : ""}`}
     >
       <span className="node" onClick={() => onToggleDone(card.id)} title="Toggle done" />
-      <div className={`card${isDragging ? " dragging" : ""}`}>
+      <div
+        className={`card${isDragging ? " dragging" : ""}`}
+        onClick={() => onOpenDetail(card)}
+      >
         <div className="r">
           <span
             className="grip"
             {...attributes}
             {...listeners}
+            onClick={(e) => e.stopPropagation()}
             aria-label="Drag to reorder"
           >
             ⋮⋮
           </span>
           <h5>{card.title}</h5>
           {card.icon ? <span className="thumb">{card.icon}</span> : null}
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label={`Edit ${card.title}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(card);
+            }}
+          >
+            ✎
+          </button>
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label={`Delete ${card.title}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(card);
+            }}
+          >
+            🗑
+          </button>
         </div>
         {card.description ? <p>{card.description}</p> : null}
         <div className="foot">

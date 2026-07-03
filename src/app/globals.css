@@ -54,7 +54,24 @@ body {
 .flow .top {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  row-gap: 10px;
   margin-bottom: 24px;
+}
+@media (max-width: 520px) {
+  .flow .top {
+    justify-content: space-between;
+  }
+  .flow .top .brand {
+    flex: 1 1 100%;
+  }
+  .flow .btn {
+    margin-left: 0;
+  }
+  .flow .session-menu,
+  .flow .av {
+    margin-left: 0;
+  }
 }
 .flow .brand {
   display: flex;
@@ -567,6 +584,36 @@ body {
   transform: translateY(-1px);
 }
 
+/* ---- Attachments (card detail view) ---- */
+.flow .attachments {
+  margin: 14px 0;
+}
+.flow .attachment-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+.flow .attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f6f7fb;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 4px 6px;
+}
+.flow .attachment-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+.flow .attach-upload {
+  margin-top: 4px;
+}
+
 /* ---- Empty state ---- */
 .flow .empty-state {
   text-align: center;
@@ -596,6 +643,15 @@ body {
 .flow .session-email {
   font-size: 12px;
   color: var(--muted);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  .flow .session-email {
+    max-width: 90px;
+  }
 }
 
 .flow .thumb {

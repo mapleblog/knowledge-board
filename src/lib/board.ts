@@ -21,6 +21,22 @@ export function statusPill(status: CardStatus): { label: string; accent: boolean
   }
 }
 
+/**
+ * Fractional order_index for a card that now sits at `movedIndex` within
+ * `cards` (already reordered), so only that one row needs to be written.
+ */
+export function reorderIndex(
+  cards: Pick<Card, "order_index">[],
+  movedIndex: number
+): number {
+  const prev = cards[movedIndex - 1];
+  const next = cards[movedIndex + 1];
+  if (prev && next) return (prev.order_index + next.order_index) / 2;
+  if (prev) return prev.order_index + 1;
+  if (next) return next.order_index - 1;
+  return 1;
+}
+
 /** A short attachment/link chip label, e.g. "🔗 mdn" or "📎 notes.md". */
 export function linkLabel(url: string): string {
   try {

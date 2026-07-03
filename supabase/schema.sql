@@ -88,3 +88,42 @@ drop trigger if exists cards_touch_updated_at on public.cards;
 create trigger cards_touch_updated_at
   before update on public.cards
   for each row execute function public.touch_updated_at();
+
+-- ---------- Storage (attachments) ----------
+-- Manual step: create a private bucket named "attachments" (Storage → New
+-- bucket, "Public" OFF) in the Supabase dashboard, then run the policies
+-- below. Objects are stored as "{card_id}/{uuid}-{filename}", so ownership
+-- is checked by tracing the card_id path segment back to the owning board.
+
+create policy "own attachment objects select" on storage.objects
+  for select using (
+    bucket_id = 'attachments'
+    and exists (
+      select 1 from public.cards c
+      join public.boards b on b.id = c.board_id
+      where c.id::text = (storage.foldername(name))[1]
+        and b.user_id = auth.uid()
+    )
+  );
+
+create policy "own attachment objects insert" on storage.objects
+  for insert with check (
+    bucket_id = 'attachments'
+    and exists (
+      select 1 from public.cards c
+      join public.boards b on b.id = c.board_id
+      where c.id::text = (storage.foldername(name))[1]
+        and b.user_id = auth.uid()
+    )
+  );
+
+create policy "own attachment objects delete" on storage.objects
+  for delete using (
+    bucket_id = 'attachments'
+    and exists (
+      select 1 from public.cards c
+      join public.boards b on b.id = c.board_id
+      where c.id::text = (storage.foldername(name))[1]
+        and b.user_id = auth.uid()
+    )
+  );
