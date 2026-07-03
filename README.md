@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Trailmark — Knowledge Board
 
-## Getting Started
+Sequence *what to learn next*. Create a board per subject and order your
+knowledge cards as a top-to-bottom **learning path**, with drag-to-reorder,
+reference links, and file attachments.
 
-First, run the development server:
+Built to the spec in [`docs/prd.md`](docs/prd.md) using the **"Flow"** design
+system in [`docs/DESIGN.md`](docs/DESIGN.md) (reverse-extracted from
+[`docs/mockup.html`](docs/mockup.html)).
+
+## Stack
+
+- **Next.js 16 (App Router) + TypeScript**
+- **Tailwind CSS v4** + a scoped `.flow` design-system stylesheet in
+  `src/app/globals.css`
+- **@dnd-kit** for accessible, touch-capable drag-to-reorder
+- **Supabase** (Postgres + Auth + Storage) — client helpers scaffolded, not yet wired
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app currently renders in-memory seed data (`src/lib/sample-data.ts`) so the
+UI is fully interactive out of the box — switch boards, drag steps to reorder,
+click a timeline node to toggle "done", and add a step.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project layout
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+  app/
+    globals.css              Flow design tokens + components (ported from the mockup)
+    layout.tsx  page.tsx     Root layout + home (renders the board view)
+  components/flow/
+    KnowledgeBoardApp.tsx    Top-level client shell + local state
+    BoardList.tsx            Left column: boards with accent rings + progress
+    TimelinePath.tsx         Right column: the path + @dnd-kit drag context
+    StepCard.tsx             A single sortable timeline step
+  lib/
+    types.ts                 Domain types (mirror the DB schema)
+    board.ts                 Progress + status-pill helpers
+    sample-data.ts           Seed data (mirrors docs/mockup.html)
+    supabase/                Browser + server client helpers
+supabase/
+  schema.sql                 Tables + Row-Level Security + updated_at trigger
+docs/                        PRD, design system, and original mockups/wireframes
+```
 
-## Learn More
+## Wiring up Supabase (next steps)
 
-To learn more about Next.js, take a look at the following resources:
+1. Create a Supabase project, then copy `.env.example` → `.env.local` and fill
+   in `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+2. Run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL editor
+   (creates tables + RLS policies).
+3. Add email/password auth screens and a middleware session refresh.
+4. Replace the `sample-data` reads in `page.tsx` with a Supabase query, and swap
+   the local mutations in `KnowledgeBoardApp.tsx` for server actions with
+   optimistic UI.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `docs/prd.md` §5 for the phased roadmap.

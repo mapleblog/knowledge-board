@@ -1,26 +1,370 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Knowledge Board — "Flow" design system
+   Ported from docs/mockup.html + docs/DESIGN.md
+   Tokens live on the .flow scope so the surface can render a
+   light theme regardless of the app chrome around it.
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  margin: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font);
+  background: #e9ebf1;
+  color: #1a1d26;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ---- Flow theme scope ---- */
+.flow {
+  --bg: #f7f8fb;
+  --panel: #ffffff;
+  --ink: #1a1d26;
+  --muted: #737a89;
+  --line: #eaecf2;
+  --accent: #4f46e5;
+  font-family: var(--font);
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.flow .surface {
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: 20px;
+  padding: 26px 28px;
+  box-shadow: 0 30px 60px -40px rgba(20, 24, 60, 0.5),
+    inset 0 0 0 1px #eef0f5;
+}
+
+/* ---- Top bar ---- */
+.flow .top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.flow .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 17px;
+}
+.flow .brand .m {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: var(--accent);
+}
+.flow .brand .m::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 2px solid #fff;
+  border-radius: 3px;
+}
+.flow .btn {
+  margin-left: 14px;
+  border: 0;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  font-family: var(--font);
+  box-shadow: 0 8px 20px -8px rgba(79, 70, 229, 0.7);
+  transition: 0.15s;
+}
+.flow .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -8px rgba(79, 70, 229, 0.75);
+}
+.flow .btn.ghost {
+  background: #eef0ff;
+  color: var(--accent);
+  box-shadow: none;
+}
+.flow .av {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 0;
+  cursor: pointer;
+  background: linear-gradient(135deg, #f0abfc, #818cf8);
+}
+
+/* ---- Two-column body ---- */
+.flow .cols {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .flow .cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+.flow .subhead {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+/* ---- Board list ---- */
+.flow .board-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.flow .b-item {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+  transition: 0.15s;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+.flow .b-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -16px rgba(20, 24, 60, 0.4);
+}
+.flow .b-item.on {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+.flow .ring {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  flex: 0 0 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+}
+.flow .b-item h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.flow .b-item p {
+  margin: 3px 0 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.flow .progress {
+  height: 5px;
+  border-radius: 5px;
+  background: #eef0f5;
+  overflow: hidden;
+}
+.flow .progress i {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+}
+
+.flow .new-board {
+  border: 2px dashed var(--line);
+  border-radius: 14px;
+  padding: 13px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  background: transparent;
+  transition: 0.15s;
+  font-family: var(--font);
+  width: 100%;
+}
+.flow .new-board:hover {
+  border-color: #c9cee0;
+  color: var(--ink);
+}
+
+/* ---- Timeline path ---- */
+.flow .path {
+  position: relative;
+  padding-left: 8px;
+}
+.flow .path-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.flow .path-head h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.flow .path-head .tag {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.flow .step {
+  position: relative;
+  padding-left: 42px;
+  padding-bottom: 14px;
+}
+.flow .step::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 26px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--line);
+}
+.flow .step:last-of-type::before {
+  display: none;
+}
+.flow .step .node {
+  position: absolute;
+  left: 6px;
+  top: 14px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--accent);
+  z-index: 2;
+}
+.flow .step.done .node {
+  background: var(--accent);
+}
+.flow .step.done .node::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px #fff;
+}
+
+.flow .card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 14px 16px;
+  cursor: grab;
+  transition: 0.12s;
+}
+.flow .card:hover {
+  box-shadow: 0 12px 26px -18px rgba(20, 24, 60, 0.5);
+}
+.flow .card.dragging {
+  opacity: 0.55;
+  transform: rotate(-1deg) scale(1.01);
+}
+.flow .card .r {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.flow .card .grip {
+  color: #c4c8d4;
+  letter-spacing: -2px;
+  cursor: grab;
+  font-size: 15px;
+  touch-action: none;
+}
+.flow .card h5 {
+  margin: 0;
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+}
+.flow .card p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.flow .card .foot {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.flow .mini {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: #f0f1f7;
+  color: #6b7280;
+}
+.flow .mini.accent {
+  background: #eef0ff;
+  color: var(--accent);
+}
+
+.flow .add-step {
+  margin-left: 42px;
+  border: 2px dashed var(--line);
+  border-radius: 13px;
+  padding: 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.15s;
+  background: transparent;
+  font-family: var(--font);
+  width: calc(100% - 42px);
+}
+.flow .add-step:hover {
+  border-color: #c9cee0;
+  color: var(--ink);
+}
+
+/* drop indicator shown while dragging to reorder */
+.flow .drop-line {
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin: 0 0 14px 42px;
+  box-shadow: 0 0 8px rgba(79, 70, 229, 0.4);
+}
+
+.flow .thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  flex: 0 0 52px;
+  background: linear-gradient(135deg, #e9ebff, #f3e8ff);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
 }

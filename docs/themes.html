@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en" data-theme="corkboard">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knowledge Board — Theme Playground</title>
+<style>
+  /* =====================================================================
+     THEME PLAYGROUND
+     Same layout structure as wireframe.html (sidebar + 3 screens),
+     now styled by 3 swappable themes via CSS custom properties.
+     Switch themes with the buttons at the top-right of the sidebar.
+     ===================================================================== */
+
+  /* ---------- THEME TOKENS ---------- */
+  /* Theme 1: Corkboard — warm, calm "index card on a corkboard" (PRD direction) */
+  [data-theme="corkboard"] {
+    --bg:            #efe7d8;
+    --bg-texture:    radial-gradient(circle at 1px 1px, rgba(140,110,70,.10) 1px, transparent 0);
+    --surface:       #fffdf8;
+    --surface-2:     #f7f1e6;
+    --sidebar-bg:    #4a3f33;
+    --sidebar-fg:    #e9e0d2;
+    --sidebar-muted: #b3a793;
+    --sidebar-active:#5f5241;
+    --text:          #3a3226;
+    --muted:         #8a7d6a;
+    --border:        #e0d6c3;
+    --accent:        #c8792e;
+    --accent-soft:   #f3e3d0;
+    --radius:        10px;
+    --shadow:        0 2px 4px rgba(74,63,51,.08), 0 6px 16px rgba(74,63,51,.10);
+    --font:          "Iowan Old Style", Georgia, serif;
+    --font-ui:       system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+  /* Theme 2: Calm Slate — cool, minimal, airy (default modern SaaS feel) */
+  [data-theme="slate"] {
+    --bg:            #f1f4f8;
+    --bg-texture:    none;
+    --surface:       #ffffff;
+    --surface-2:     #f6f8fb;
+    --sidebar-bg:    #ffffff;
+    --sidebar-fg:    #2b3446;
+    --sidebar-muted: #9aa5b6;
+    --sidebar-active:#eef2f9;
+    --text:          #1f2733;
+    --muted:         #77808f;
+    --border:        #e4e9f0;
+    --accent:        #3b6cf5;
+    --accent-soft:   #e6edfe;
+    --radius:        12px;
+    --shadow:        0 1px 2px rgba(30,40,60,.05), 0 8px 24px rgba(30,40,60,.06);
+    --font:          system-ui, -apple-system, Segoe UI, sans-serif;
+    --font-ui:       system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+  /* Theme 3: Focus Dark — low-noise dark mode, muted teal accent */
+  [data-theme="dark"] {
+    --bg:            #16191d;
+    --bg-texture:    none;
+    --surface:       #21262d;
+    --surface-2:     #1b2027;
+    --sidebar-bg:    #0f1216;
+    --sidebar-fg:    #d5dbe2;
+    --sidebar-muted: #6b7480;
+    --sidebar-active:#242b33;
+    --text:          #e6ebf1;
+    --muted:         #8b95a1;
+    --border:        #2d343d;
+    --accent:        #3fb6a8;
+    --accent-soft:   #1e3330;
+    --radius:        12px;
+    --shadow:        0 2px 6px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.45);
+    --font:          system-ui, -apple-system, Segoe UI, sans-serif;
+    --font-ui:       system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+
+  /* board accent presets (PRD: one accent color per board, preset palette) */
+  .accent-1 { --board-accent: #c8792e; }
+  .accent-2 { --board-accent: #3b6cf5; }
+  .accent-3 { --board-accent: #4b9e6a; }
+  .accent-4 { --board-accent: #b0517d; }
+
+  /* ---------- BASE ---------- */
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font-ui);
+    color: var(--text);
+    background-color: var(--bg);
+    background-image: var(--bg-texture);
+    background-size: 22px 22px;
+    display: flex;
+    min-height: 100vh;
+    transition: background-color .25s, color .25s;
+  }
+
+  /* ---------- SIDEBAR (no top navbar) ---------- */
+  .sidebar {
+    width: 240px;
+    flex: 0 0 240px;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-fg);
+    border-right: 1px solid var(--border);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .brand {
+    display:flex; align-items:center; gap:10px;
+    font-family: var(--font);
+    font-size: 17px; font-weight: 600;
+    color: var(--sidebar-fg);
+    margin-bottom: 14px; padding: 0 4px;
+  }
+  .brand .mark {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: var(--accent); flex:0 0 26px;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:14px; font-weight:700;
+  }
+  .theme-switch { display:flex; gap:6px; margin: 0 4px 16px; }
+  .theme-switch button {
+    flex:1; font-size:11px; padding:6px 0; cursor:pointer;
+    border:1px solid var(--border); border-radius:6px;
+    background: transparent; color: var(--sidebar-muted);
+    font-family: var(--font-ui);
+  }
+  .theme-switch button.on { background: var(--accent); color:#fff; border-color: var(--accent); }
+
+  .nav-item {
+    padding: 9px 12px; border-radius: 8px;
+    font-size: 13.5px; color: var(--sidebar-fg);
+    cursor:pointer; display:flex; align-items:center; gap:9px;
+    transition: background .15s;
+  }
+  .nav-item:hover { background: var(--sidebar-active); }
+  .nav-item.active { background: var(--sidebar-active); font-weight:600; }
+  .nav-item .dot { width:9px; height:9px; border-radius:50%; background: var(--board-accent,#999); flex:0 0 9px; }
+  .nav-sub { font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color: var(--sidebar-muted); margin: 16px 4px 6px; }
+  .spacer { flex:1; }
+  .user { display:flex; align-items:center; gap:10px; padding: 8px; border-top:1px solid var(--border); margin-top:8px; }
+  .avatar { width:30px; height:30px; border-radius:50%; background: var(--accent); flex:0 0 30px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:600; }
+  .user .uname { font-size:13px; } .user .umail { font-size:11px; color: var(--sidebar-muted); }
+
+  /* ---------- CONTENT ---------- */
+  .content { flex:1; padding: 32px 40px; overflow:auto; }
+  .screen { display:none; } .screen.active { display:block; }
+  .screen-title { font-family: var(--font); font-size: 24px; margin:0 0 4px; font-weight:600; }
+  .screen-caption { font-size:13px; color: var(--muted); margin-bottom: 22px; }
+
+  .toolbar { display:flex; align-items:center; justify-content:space-between; margin: 18px 0 20px; gap:16px; }
+  .count { font-size:13px; color: var(--muted); }
+
+  .btn {
+    display:inline-flex; align-items:center; gap:6px;
+    padding: 9px 15px; font-size:13.5px; font-weight:500;
+    border-radius: 8px; cursor:pointer;
+    border:1px solid var(--border); background: var(--surface); color: var(--text);
+    font-family: var(--font-ui);
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color:#fff; }
+  .btn.ghost { background: transparent; }
+  .btn.danger { color:#c0392b; border-color: transparent; background: transparent; }
+
+  /* ---------- SCREEN 1: DASHBOARD ---------- */
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap:20px; }
+  .board-card {
+    background: var(--surface); border:1px solid var(--border);
+    border-radius: var(--radius); overflow:hidden; box-shadow: var(--shadow);
+    cursor:pointer; transition: transform .12s, box-shadow .12s;
+  }
+  .board-card:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,.14); }
+  .board-card .accent { height:6px; background: var(--board-accent,#999); }
+  .board-card .body { padding: 16px; }
+  .board-card h3 { font-family: var(--font); margin:0 0 6px; font-size:16px; font-weight:600; }
+  .board-card p { margin:0 0 14px; font-size:13px; color: var(--muted); line-height:1.5; }
+  .board-card .meta { font-size:11.5px; color: var(--muted); display:flex; gap:12px; }
+  .board-card.new {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-height:150px; border-style:dashed; color: var(--muted); box-shadow:none; gap:6px;
+  }
+  .board-card.new .plus { font-size:30px; line-height:1; }
+
+  /* ---------- SCREEN 2: BOARD (card list) ---------- */
+  .board-head h2 { font-family: var(--font); margin:0 0 4px; font-size:22px; }
+  .board-head p { margin:0; font-size:13px; color: var(--muted); }
+  .card-list { display:flex; flex-direction:column; gap:12px; max-width:680px; }
+  .kcard {
+    display:flex; align-items:center; gap:14px; padding:14px 16px;
+    background: var(--surface); border:1px solid var(--border);
+    border-left:3px solid var(--board-accent,#999);
+    border-radius: var(--radius); box-shadow: var(--shadow); cursor:pointer;
+    transition: transform .1s;
+  }
+  .kcard:hover { transform: translateX(2px); }
+  .kcard.dragging { opacity:.85; border-style:dashed; box-shadow:0 14px 30px rgba(0,0,0,.18); transform: rotate(-.4deg); }
+  .drag { color: var(--muted); font-size:16px; cursor:grab; user-select:none; flex:0 0 auto; }
+  .kcard .grow { flex:1; min-width:0; }
+  .kcard h4 { margin:0 0 3px; font-size:15px; font-weight:600; }
+  .kcard .sub { margin:0; font-size:12.5px; color: var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .kcard .tags { display:flex; gap:6px; margin-top:6px; }
+  .chip { font-size:10.5px; padding:2px 8px; border-radius:20px; background: var(--accent-soft); color: var(--accent); }
+  .thumb { width:44px; height:44px; border-radius:8px; background: var(--surface-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px; color: var(--muted); flex:0 0 44px; }
+  .step-num { width:22px; height:22px; border-radius:50%; background: var(--accent-soft); color: var(--accent); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:0 0 22px; }
+
+  /* ---------- SCREEN 3: CARD DETAIL (side panel) ---------- */
+  .detail-wrap { display:flex; gap:24px; max-width:1000px; }
+  .detail-wrap .left { flex:1; opacity:.45; pointer-events:none; }
+  .panel {
+    flex:0 0 380px; background: var(--surface); border:1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding:22px;
+    display:flex; flex-direction:column; gap:18px; align-self:flex-start;
+  }
+  .panel-head { display:flex; align-items:center; justify-content:space-between; }
+  .panel-head .kicker { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color: var(--accent); font-weight:600; }
+  .panel-head .close { cursor:pointer; color: var(--muted); font-size:18px; }
+  .panel h3 { font-family: var(--font); margin:0; font-size:20px; }
+  .field .cap { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); display:block; margin-bottom:6px; }
+  .field p { margin:0; font-size:14px; line-height:1.6; }
+  .url-box { display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background: var(--surface-2); font-size:13px; color: var(--accent); }
+  .attach { display:flex; align-items:center; gap:12px; padding:12px; border:1px dashed var(--border); border-radius:8px; background: var(--surface-2); }
+  .attach .file-ic { width:40px; height:48px; border-radius:5px; background: var(--surface); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .attach .fmeta .fn { font-size:13px; font-weight:500; } .attach .fmeta .fs { font-size:11.5px; color: var(--muted); }
+  .panel-actions { display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border); padding-top:16px; }
+
+  @media (max-width: 820px) {
+    .detail-wrap { flex-direction:column; } .detail-wrap .left { display:none; }
+    .panel { flex:1 1 auto; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ================= SIDEBAR (no top navbar) ================= -->
+  <aside class="sidebar">
+    <div class="brand"><span class="mark">W</span> Waypoint</div>
+
+    <div class="theme-switch">
+      <button data-set-theme="corkboard" class="on">Corkboard</button>
+      <button data-set-theme="slate">Slate</button>
+      <button data-set-theme="dark">Dark</button>
+    </div>
+
+    <div class="nav-item active" data-screen="dashboard">▦ Dashboard</div>
+
+    <div class="nav-sub">My boards</div>
+    <div class="nav-item accent-1" data-screen="board"><span class="dot"></span> Learn Web Dev</div>
+    <div class="nav-item accent-2" data-screen="board"><span class="dot"></span> Spanish</div>
+    <div class="nav-item accent-3" data-screen="board"><span class="dot"></span> Learn Guitar</div>
+    <div class="nav-item accent-4" data-screen="detail"><span class="dot"></span> Excel Basics</div>
+
+    <div class="spacer"></div>
+    <div class="user">
+      <span class="avatar">TK</span>
+      <div><div class="uname">Tk Goh</div><div class="umail">tkgoh228@gmail.com</div></div>
+    </div>
+  </aside>
+
+  <!-- ================= CONTENT ================= -->
+  <main class="content">
+
+    <!-- ---------- SCREEN 1: DASHBOARD ---------- -->
+    <section class="screen active" id="dashboard">
+      <h1 class="screen-title">My boards</h1>
+      <p class="screen-caption">One board per subject — each with its own accent color for quick visual scanning.</p>
+
+      <div class="toolbar">
+        <span class="count">4 boards</span>
+        <button class="btn primary">+ New board</button>
+      </div>
+
+      <div class="grid">
+        <div class="board-card accent-1">
+          <div class="accent"></div>
+          <div class="body">
+            <h3>Learn Web Dev</h3>
+            <p>HTML, CSS, JS fundamentals through to React and deployment.</p>
+            <div class="meta"><span>12 cards</span><span>Updated 2d ago</span></div>
+          </div>
+        </div>
+        <div class="board-card accent-2">
+          <div class="accent"></div>
+          <div class="body">
+            <h3>Spanish</h3>
+            <p>Grammar, vocab decks, and listening practice, in order.</p>
+            <div class="meta"><span>23 cards</span><span>Updated today</span></div>
+          </div>
+        </div>
+        <div class="board-card accent-3">
+          <div class="accent"></div>
+          <div class="body">
+            <h3>Learn Guitar</h3>
+            <p>Chords, strumming patterns, and first songs to practice.</p>
+            <div class="meta"><span>8 cards</span><span>Updated 1w ago</span></div>
+          </div>
+        </div>
+        <div class="board-card accent-4">
+          <div class="accent"></div>
+          <div class="body">
+            <h3>Excel Basics</h3>
+            <p>Formulas, pivot tables, and charts for the exam.</p>
+            <div class="meta"><span>15 cards</span><span>Updated 3d ago</span></div>
+          </div>
+        </div>
+        <div class="board-card new">
+          <div class="plus">+</div>
+          <div>New board</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- SCREEN 2: BOARD (ordered cards) ---------- -->
+    <section class="screen accent-1" id="board">
+      <div class="toolbar">
+        <div class="board-head">
+          <h2>Learn Web Dev</h2>
+          <p>Your learning path — drag cards to reorder the sequence.</p>
+        </div>
+        <button class="btn primary">+ Add card</button>
+      </div>
+
+      <div class="card-list">
+        <div class="kcard">
+          <span class="drag">⠿</span>
+          <span class="step-num">1</span>
+          <div class="grow">
+            <h4>How the web works</h4>
+            <p class="sub">Clients, servers, HTTP requests, and the DNS lookup flow.</p>
+            <div class="tags"><span class="chip">article</span><span class="chip">15 min</span></div>
+          </div>
+          <div class="thumb">🔗</div>
+        </div>
+
+        <div class="kcard">
+          <span class="drag">⠿</span>
+          <span class="step-num">2</span>
+          <div class="grow">
+            <h4>HTML structure & semantics</h4>
+            <p class="sub">Elements, attributes, and building an accessible page.</p>
+            <div class="tags"><span class="chip">pdf</span></div>
+          </div>
+          <div class="thumb">📄</div>
+        </div>
+
+        <div class="kcard dragging">
+          <span class="drag">⠿</span>
+          <span class="step-num">3</span>
+          <div class="grow">
+            <h4>CSS layout: flexbox & grid</h4>
+            <p class="sub">Being dragged into a new position…</p>
+          </div>
+          <div class="thumb">🖼️</div>
+        </div>
+
+        <div class="kcard">
+          <span class="drag">⠿</span>
+          <span class="step-num">4</span>
+          <div class="grow">
+            <h4>JavaScript fundamentals</h4>
+            <p class="sub">Variables, functions, the DOM, and events.</p>
+          </div>
+          <div class="thumb">🔗</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- SCREEN 3: CARD DETAIL (side panel) ---------- -->
+    <section class="screen accent-4" id="detail">
+      <h1 class="screen-title">Card detail</h1>
+      <p class="screen-caption">Clicking a card opens the full detail panel beside the board.</p>
+
+      <div class="detail-wrap">
+        <div class="left card-list">
+          <div class="kcard"><span class="drag">⠿</span><span class="step-num">1</span><div class="grow"><h4>Formula basics</h4><p class="sub">SUM, AVERAGE, and cell references.</p></div></div>
+          <div class="kcard"><span class="drag">⠿</span><span class="step-num">2</span><div class="grow"><h4>Pivot tables</h4><p class="sub">Summarising data quickly.</p></div></div>
+          <div class="kcard"><span class="drag">⠿</span><span class="step-num">3</span><div class="grow"><h4>Charts</h4><p class="sub">Turning tables into visuals.</p></div></div>
+        </div>
+
+        <aside class="panel">
+          <div class="panel-head">
+            <span class="kicker">Step 2 · Excel Basics</span>
+            <span class="close">✕</span>
+          </div>
+          <h3>Pivot tables</h3>
+
+          <div class="field">
+            <span class="cap">Description</span>
+            <p>Build a pivot table from raw sales data: drag fields into rows and values, then group by month. Practice with the attached sample workbook before moving on to charts.</p>
+          </div>
+
+          <div class="field">
+            <span class="cap">Reference URL</span>
+            <div class="url-box">🔗 support.microsoft.com/pivot-tables ↗</div>
+          </div>
+
+          <div class="field">
+            <span class="cap">Attachment</span>
+            <div class="attach">
+              <div class="file-ic">📊</div>
+              <div class="fmeta"><div class="fn">sales-sample.xlsx</div><div class="fs">248 KB · spreadsheet</div></div>
+            </div>
+          </div>
+
+          <div class="panel-actions">
+            <button class="btn danger">Delete</button>
+            <button class="btn ghost">Edit</button>
+            <button class="btn primary">Open URL</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // theme switcher
+    document.querySelectorAll('[data-set-theme]').forEach(function(b){
+      b.addEventListener('click', function(){
+        document.documentElement.setAttribute('data-theme', b.getAttribute('data-set-theme'));
+        document.querySelectorAll('[data-set-theme]').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+      });
+    });
+    // screen switcher (same behaviour as wireframe.html)
+    document.querySelectorAll('.nav-item[data-screen]').forEach(function(item){
+      item.addEventListener('click', function(){
+        var target = item.getAttribute('data-screen');
+        document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+        item.classList.add('active');
+        document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Board — Wireframes</title>
+<style>
+  :root{
+    --ink:#333;
+    --line:#bbb;
+    --line-strong:#888;
+    --fill:#e6e6e6;
+    --fill-2:#f0f0f0;
+    --fill-3:#d8d8d8;
+    --bg:#fafafa;
+    --radius:6px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:#f4f4f4;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---- page scaffolding ---- */
+  .page-head{
+    max-width:1200px;margin:0 auto;padding:32px 24px 8px;
+  }
+  .page-head h1{margin:0 0 4px;font-size:20px;font-weight:700;letter-spacing:.2px;}
+  .page-head p{margin:0;color:#777;font-size:13px;}
+
+  .board{
+    max-width:1200px;margin:0 auto;padding:16px 24px 64px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+    align-items:start;
+  }
+  @media(max-width:980px){ .board{grid-template-columns:1fr;} }
+
+  .screen{
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.05);
+  }
+  .screen-label{
+    display:flex;align-items:baseline;gap:8px;
+    padding:10px 14px;
+    background:#efefef;
+    border-bottom:1px solid var(--line);
+    font-size:12px;
+  }
+  .screen-label b{font-size:13px;}
+  .screen-label span{color:#888;}
+  .screen-body{padding:14px;}
+
+  /* ---- generic wireframe primitives ---- */
+  .box{background:var(--fill);border:1px solid var(--line);border-radius:var(--radius);}
+  .box-2{background:var(--fill-2);border:1px dashed var(--line);border-radius:var(--radius);}
+
+  .bar{background:var(--fill-3);border-radius:3px;height:10px;}
+  .bar.sm{height:8px;}
+  .bar.lg{height:14px;}
+  .w20{width:20%;}.w30{width:30%;}.w40{width:40%;}.w50{width:50%;}
+  .w60{width:60%;}.w70{width:70%;}.w80{width:80%;}.w90{width:90%;}.w100{width:100%;}
+
+  .row{display:flex;align-items:center;gap:8px;}
+  .between{justify-content:space-between;}
+  .stack{display:flex;flex-direction:column;gap:8px;}
+  .stack-lg{display:flex;flex-direction:column;gap:14px;}
+
+  .circle{width:28px;height:28px;border-radius:50%;background:var(--fill-3);border:1px solid var(--line);flex:none;}
+  .square{width:28px;height:28px;border-radius:4px;background:var(--fill-3);border:1px solid var(--line);flex:none;}
+  .pill{height:22px;border-radius:11px;background:var(--fill);border:1px solid var(--line);}
+  .btn{height:30px;border-radius:5px;background:var(--fill-3);border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:11px;color:#666;padding:0 12px;}
+  .btn.primary{background:#555;border-color:#555;color:#fff;}
+
+  /* top app bar shared */
+  .appbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px;border-bottom:1px solid var(--line);background:#f2f2f2;
+  }
+  .logo{display:flex;align-items:center;gap:8px;}
+
+  /* accent strip (board color) */
+  .accent{height:6px;border-radius:3px 3px 0 0;background:var(--line-strong);}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  /* card in board list */
+  .kcard{padding:10px;display:flex;gap:10px;align-items:flex-start;}
+  .drag{width:12px;height:100%;min-height:38px;display:flex;flex-direction:column;justify-content:center;gap:3px;flex:none;}
+  .drag i{display:block;height:2px;background:var(--line-strong);border-radius:2px;}
+
+  .note{margin-top:10px;font-size:11px;color:#999;text-align:center;font-style:italic;}
+  .tag{font-size:10px;color:#888;border:1px solid var(--line);border-radius:4px;padding:2px 6px;background:#fff;}
+
+  /* modal overlay for detail */
+  .overlay{background:repeating-linear-gradient(45deg,#eee,#eee 6px,#e8e8e8 6px,#e8e8e8 12px);padding:16px;border-radius:6px;}
+  .modal{background:#fff;border:1px solid var(--line-strong);border-radius:8px;padding:14px;box-shadow:0 6px 18px rgba(0,0,0,.12);}
+  .close{width:22px;height:22px;border-radius:4px;border:1px solid var(--line);background:var(--fill);font-size:12px;color:#888;display:flex;align-items:center;justify-content:center;flex:none;}
+  .attach{border:1px dashed var(--line-strong);border-radius:6px;padding:10px;display:flex;gap:10px;align-items:center;}
+  .thumb{width:44px;height:44px;border-radius:4px;background:var(--fill-3);border:1px solid var(--line);flex:none;}
+</style>
+</head>
+<body>
+
+  <div class="page-head">
+    <h1>Knowledge Board — Layout Wireframes</h1>
+    <p>Medium-fidelity, grayscale. Structure only — no branding, colors, or final copy.</p>
+  </div>
+
+  <div class="board">
+
+    <!-- ============ SCREEN 1: DASHBOARD ============ -->
+    <section class="screen">
+      <div class="screen-label"><b>1 · Dashboard</b><span>My boards</span></div>
+      <div class="screen-body" style="padding:0;">
+        <!-- app bar -->
+        <div class="appbar">
+          <div class="logo"><div class="square"></div><div class="bar w60" style="width:70px;"></div></div>
+          <div class="row"><div class="pill" style="width:64px;"></div><div class="circle"></div></div>
+        </div>
+
+        <div style="padding:14px;">
+          <!-- page title + new board -->
+          <div class="row between" style="margin-bottom:14px;">
+            <div class="bar lg w40"></div>
+            <div class="btn primary">+ New board</div>
+          </div>
+
+          <!-- board cards grid -->
+          <div class="grid-2">
+            <div class="box" style="overflow:hidden;">
+              <div class="accent"></div>
+              <div style="padding:10px;" class="stack">
+                <div class="bar lg w70"></div>
+                <div class="bar sm w90"></div>
+                <div class="bar sm w50"></div>
+                <div class="row between" style="margin-top:4px;">
+                  <span class="tag">12 cards</span><div class="bar sm w20"></div>
+                </div>
+              </div>
+            </div>
+            <div class="box" style="overflow:hidden;">
+              <div class="accent" style="background:var(--line);"></div>
+              <div style="padding:10px;" class="stack">
+                <div class="bar lg w60"></div>
+                <div class="bar sm w80"></div>
+                <div class="bar sm w40"></div>
+                <div class="row between" style="margin-top:4px;">
+                  <span class="tag">4 cards</span><div class="bar sm w20"></div>
+                </div>
+              </div>
+            </div>
+            <div class="box" style="overflow:hidden;">
+              <div class="accent" style="background:#aaa;"></div>
+              <div style="padding:10px;" class="stack">
+                <div class="bar lg w50"></div>
+                <div class="bar sm w90"></div>
+                <div class="bar sm w60"></div>
+                <div class="row between" style="margin-top:4px;">
+                  <span class="tag">27 cards</span><div class="bar sm w20"></div>
+                </div>
+              </div>
+            </div>
+            <!-- add-board placeholder -->
+            <div class="box-2" style="min-height:118px;display:flex;align-items:center;justify-content:center;">
+              <div class="stack" style="align-items:center;">
+                <div class="square" style="width:24px;height:24px;"></div>
+                <div class="bar sm" style="width:56px;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="note">Grid of boards · accent strip per subject · click → Board</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 2: BOARD (CARD LIST) ============ -->
+    <section class="screen">
+      <div class="screen-label"><b>2 · Board</b><span>Ordered cards + drag</span></div>
+      <div class="screen-body" style="padding:0;">
+        <div class="appbar">
+          <div class="logo"><div class="square" style="width:20px;height:20px;"></div><div class="bar" style="width:50px;"></div></div>
+          <div class="circle"></div>
+        </div>
+
+        <!-- board header with accent -->
+        <div class="accent" style="margin:0;"></div>
+        <div style="padding:14px;">
+          <div class="row between" style="margin-bottom:6px;">
+            <div class="stack" style="gap:6px;">
+              <div class="bar lg w60" style="width:150px;"></div>
+              <div class="bar sm w80" style="width:180px;"></div>
+            </div>
+            <div class="row"><div class="close">···</div></div>
+          </div>
+
+          <div class="row between" style="margin:12px 0;">
+            <div class="tag">Ordered · 5</div>
+            <div class="btn primary">+ Add card</div>
+          </div>
+
+          <!-- ordered card list -->
+          <div class="stack">
+            <!-- card being dragged -->
+            <div class="box kcard" style="border-style:dashed;border-color:var(--line-strong);background:#f7f7f7;">
+              <div class="drag"><i></i><i></i><i></i></div>
+              <div class="stack" style="flex:1;gap:6px;">
+                <div class="bar w70"></div>
+                <div class="bar sm w90"></div>
+              </div>
+              <span class="tag">↕</span>
+            </div>
+
+            <div class="box kcard">
+              <div class="drag"><i></i><i></i><i></i></div>
+              <div class="stack" style="flex:1;gap:6px;">
+                <div class="bar w50"></div>
+                <div class="bar sm w80"></div>
+                <div class="row" style="gap:6px;"><span class="tag">🔗 URL</span><span class="tag">📎 1</span></div>
+              </div>
+            </div>
+
+            <div class="box kcard">
+              <div class="drag"><i></i><i></i><i></i></div>
+              <div class="stack" style="flex:1;gap:6px;">
+                <div class="bar w60"></div>
+                <div class="bar sm w70"></div>
+              </div>
+            </div>
+
+            <div class="box kcard">
+              <div class="drag"><i></i><i></i><i></i></div>
+              <div class="stack" style="flex:1;gap:6px;">
+                <div class="bar w40"></div>
+                <div class="bar sm w90"></div>
+                <div class="row" style="gap:6px;"><span class="tag">📎 2</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="note">Vertical ordered list · drag handle reorders sequence</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 3: CARD DETAIL ============ -->
+    <section class="screen">
+      <div class="screen-label"><b>3 · Card detail</b><span>Modal / side panel</span></div>
+      <div class="screen-body" style="padding:0;">
+        <div class="appbar">
+          <div class="logo"><div class="square" style="width:20px;height:20px;"></div><div class="bar" style="width:50px;"></div></div>
+          <div class="circle"></div>
+        </div>
+
+        <!-- dimmed board behind + modal -->
+        <div class="overlay">
+          <div class="modal stack-lg">
+            <!-- header: title + close -->
+            <div class="row between">
+              <div class="bar lg w70"></div>
+              <div class="close">✕</div>
+            </div>
+
+            <!-- description block -->
+            <div class="stack" style="gap:6px;">
+              <div class="bar sm" style="width:44px;background:var(--line);"></div>
+              <div class="bar sm w100"></div>
+              <div class="bar sm w100"></div>
+              <div class="bar sm w80"></div>
+            </div>
+
+            <!-- reference URL -->
+            <div class="row" style="gap:8px;">
+              <span class="tag">🔗</span>
+              <div class="bar sm w70" style="text-decoration:underline;"></div>
+              <span class="tag">open ↗</span>
+            </div>
+
+            <!-- attachment -->
+            <div class="attach">
+              <div class="thumb"></div>
+              <div class="stack" style="flex:1;gap:6px;">
+                <div class="bar sm w60"></div>
+                <div class="bar sm w30"></div>
+              </div>
+              <span class="tag">⬇</span>
+            </div>
+
+            <!-- actions -->
+            <div class="row between" style="border-top:1px solid var(--line);padding-top:12px;">
+              <div class="btn" style="border-color:#c66;color:#c66;">Delete</div>
+              <div class="row"><div class="btn">Edit</div><div class="btn primary">Close</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="note" style="padding:0 14px 14px;">Expanded card over dimmed board · full text · URL · attachment · edit/delete</div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

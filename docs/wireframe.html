@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knowledge Board — Wireframes</title>
+<style>
+  /* ---- wireframe reset / grayscale playground ---- */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, Arial, sans-serif;
+    color: #333;
+    background: #e9e9e9;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* generic wireframe primitives */
+  .box       { border: 1px solid #999; background: #f4f4f4; }
+  .ph        { background: #d9d9d9; border: 1px dashed #aaa; }      /* placeholder fill */
+  .ph-img    { background: repeating-linear-gradient(45deg,#d0d0d0,#d0d0d0 8px,#c8c8c8 8px,#c8c8c8 16px); border:1px dashed #aaa; }
+  .label     { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: #888; }
+  .line      { height: 10px; background: #d0d0d0; border-radius: 2px; }
+  .line.sm   { height: 8px; }
+  .line.w25  { width: 25%; } .line.w40 { width: 40%; } .line.w60 { width: 60%; }
+  .line.w75  { width: 75%; } .line.w90 { width: 90%; }
+  .btn       { display:inline-block; padding: 8px 14px; border: 1px solid #888; background:#e0e0e0; font-size: 13px; border-radius: 3px; color:#555; }
+  .btn.dark  { background:#bcbcbc; }
+
+  /* ---- app shell: sidebar + content, NO top navbar ---- */
+  .sidebar {
+    width: 220px;
+    flex: 0 0 220px;
+    background: #cfcfcf;
+    border-right: 1px solid #999;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sidebar .brand { height: 34px; background:#b5b5b5; border:1px solid #999; border-radius:3px; margin-bottom: 16px; display:flex; align-items:center; justify-content:center; font-size:12px; color:#555; }
+  .nav-item { padding: 10px 12px; border:1px solid #aaa; background:#dcdcdc; border-radius:3px; font-size: 13px; color:#555; cursor:pointer; }
+  .nav-item.active { background:#f4f4f4; font-weight:600; border-color:#888; }
+  .nav-sub { font-size:11px; color:#888; margin: 14px 0 4px; }
+  .sidebar .spacer { flex:1; }
+  .sidebar .user { height: 40px; background:#dcdcdc; border:1px solid #aaa; border-radius:3px; display:flex; align-items:center; padding:0 10px; gap:8px; }
+  .avatar { width:22px; height:22px; border-radius:50%; background:#b0b0b0; }
+
+  .content { flex: 1; padding: 28px 32px; overflow:auto; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .screen-caption { font-size:12px; color:#999; margin-bottom: 18px; border-left:3px solid #bbb; padding-left:10px; }
+
+  h2.screen-title { font-size: 20px; margin: 0 0 4px; color:#444; font-weight:600; }
+
+  /* dashboard grid */
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(210px,1fr)); gap:18px; margin-top:20px; }
+  .board-card { padding:0; overflow:hidden; border-radius:4px; }
+  .board-card .accent { height:8px; background:#b0b0b0; }
+  .board-card .body { padding:14px; display:flex; flex-direction:column; gap:10px; }
+  .board-card.new { display:flex; align-items:center; justify-content:center; min-height:130px; border-style:dashed; color:#999; font-size:26px; }
+
+  /* board (card list) */
+  .toolbar { display:flex; align-items:center; justify-content:space-between; margin: 20px 0 16px; }
+  .card-list { display:flex; flex-direction:column; gap:12px; max-width:640px; }
+  .kcard { display:flex; align-items:center; gap:14px; padding:14px; border-radius:4px; }
+  .drag { width:16px; height:26px; background:#cbcbcb; border-radius:2px; flex:0 0 16px; }
+  .kcard .grow { flex:1; display:flex; flex-direction:column; gap:8px; }
+  .kcard .thumb { width:40px; height:40px; }
+
+  /* card detail (side panel over board) */
+  .detail-wrap { display:flex; gap:20px; max-width:900px; }
+  .detail-wrap .left { flex:1; opacity:.5; }
+  .panel { flex:0 0 360px; border-radius:4px; padding:18px; background:#f4f4f4; border:1px solid #999; box-shadow:-4px 0 0 rgba(0,0,0,.04); display:flex; flex-direction:column; gap:14px; }
+  .panel .row { display:flex; gap:8px; }
+  .panel .field { display:flex; flex-direction:column; gap:6px; }
+  .panel .field .cap { font-size:10px; text-transform:uppercase; color:#999; }
+  .panel .attach { height:120px; }
+  .mt { margin-top:14px; }
+</style>
+</head>
+<body>
+
+  <!-- ================= SIDEBAR (no top navbar) ================= -->
+  <aside class="sidebar">
+    <div class="brand">[ Logo / Board name ]</div>
+
+    <div class="nav-item active" data-screen="dashboard">Dashboard</div>
+
+    <div class="nav-sub">MY BOARDS</div>
+    <div class="nav-item" data-screen="board">Board: Learn Web Dev</div>
+    <div class="nav-item" data-screen="board">Board: Spanish</div>
+    <div class="nav-item" data-screen="board">Board: Learn Guitar</div>
+
+    <div class="nav-sub">DEMO SCREENS</div>
+    <div class="nav-item" data-screen="detail">Card detail (panel)</div>
+
+    <div class="spacer"></div>
+    <div class="user"><span class="avatar"></span><span class="line sm w60"></span></div>
+  </aside>
+
+  <!-- ================= CONTENT ================= -->
+  <main class="content">
+
+    <!-- ---------- SCREEN 1: DASHBOARD ---------- -->
+    <section class="screen active" id="dashboard">
+      <h2 class="screen-title">Dashboard — my boards</h2>
+      <div class="screen-caption">Screen 1 · Grid of the user's boards, each with an accent strip. Entry point after login.</div>
+
+      <div class="toolbar">
+        <span class="label">7 boards</span>
+        <span class="btn dark">+ New board</span>
+      </div>
+
+      <div class="grid">
+        <!-- board cards -->
+        <div class="box board-card">
+          <div class="accent"></div>
+          <div class="body">
+            <div class="line w75"></div>
+            <div class="line sm w90"></div>
+            <div class="line sm w40"></div>
+          </div>
+        </div>
+        <div class="box board-card">
+          <div class="accent" style="background:#9a9a9a"></div>
+          <div class="body">
+            <div class="line w60"></div>
+            <div class="line sm w90"></div>
+            <div class="line sm w25"></div>
+          </div>
+        </div>
+        <div class="box board-card">
+          <div class="accent" style="background:#c2c2c2"></div>
+          <div class="body">
+            <div class="line w90"></div>
+            <div class="line sm w75"></div>
+            <div class="line sm w40"></div>
+          </div>
+        </div>
+        <div class="box board-card new">+</div>
+      </div>
+    </section>
+
+    <!-- ---------- SCREEN 2: BOARD (ordered cards) ---------- -->
+    <section class="screen" id="board">
+      <h2 class="screen-title">Board — ordered knowledge cards</h2>
+      <div class="screen-caption">Screen 2 · A single board. Vertical, drag-reorderable list of cards that defines the learning sequence.</div>
+
+      <div class="toolbar">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div class="line w40" style="width:180px"></div>
+          <div class="line sm w90" style="width:260px"></div>
+        </div>
+        <span class="btn dark">+ Add card</span>
+      </div>
+
+      <div class="card-list">
+        <div class="box kcard">
+          <div class="drag" title="drag handle"></div>
+          <div class="grow"><div class="line w60"></div><div class="line sm w90"></div></div>
+          <div class="ph-img thumb"></div>
+        </div>
+        <div class="box kcard">
+          <div class="drag"></div>
+          <div class="grow"><div class="line w40"></div><div class="line sm w75"></div></div>
+          <div class="ph thumb"></div>
+        </div>
+        <div class="box kcard" style="background:#ececec; border-style:dashed;">
+          <div class="drag" style="background:#b0b0b0"></div>
+          <div class="grow"><div class="line w75"></div><div class="line sm w90"></div></div>
+          <div class="ph-img thumb"></div>
+        </div>
+        <div class="box kcard">
+          <div class="drag"></div>
+          <div class="grow"><div class="line w60"></div><div class="line sm w60"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- SCREEN 3: CARD DETAIL (side panel) ---------- -->
+    <section class="screen" id="detail">
+      <h2 class="screen-title">Card detail — expanded view</h2>
+      <div class="screen-caption">Screen 3 · Clicking a card opens a side panel: full description, reference URL, attachment preview, edit/delete.</div>
+
+      <div class="detail-wrap">
+        <!-- dimmed board behind -->
+        <div class="left card-list">
+          <div class="box kcard"><div class="drag"></div><div class="grow"><div class="line w60"></div><div class="line sm w90"></div></div></div>
+          <div class="box kcard"><div class="drag"></div><div class="grow"><div class="line w40"></div><div class="line sm w75"></div></div></div>
+          <div class="box kcard"><div class="drag"></div><div class="grow"><div class="line w75"></div><div class="line sm w60"></div></div></div>
+        </div>
+
+        <!-- panel -->
+        <aside class="panel">
+          <div class="row" style="justify-content:space-between; align-items:center;">
+            <span class="label">Card detail</span>
+            <span class="btn" style="padding:2px 8px;">✕</span>
+          </div>
+
+          <div class="field">
+            <span class="cap">Title</span>
+            <div class="line w90" style="height:14px"></div>
+          </div>
+
+          <div class="field">
+            <span class="cap">Description</span>
+            <div class="line w90"></div>
+            <div class="line w90"></div>
+            <div class="line w60"></div>
+          </div>
+
+          <div class="field">
+            <span class="cap">Reference URL</span>
+            <div class="box" style="padding:8px; display:flex; align-items:center; gap:8px;">
+              <div class="line sm w75"></div><span class="label">↗</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="cap">Attachment</span>
+            <div class="ph-img attach"></div>
+          </div>
+
+          <div class="row mt" style="justify-content:flex-end;">
+            <span class="btn">Delete</span>
+            <span class="btn dark">Edit</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // simple screen switcher for the playground
+    document.querySelectorAll('.nav-item[data-screen]').forEach(function(item){
+      item.addEventListener('click', function(){
+        var target = item.getAttribute('data-screen');
+        document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+        item.classList.add('active');
+        document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
