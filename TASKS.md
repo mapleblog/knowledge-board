@@ -32,7 +32,7 @@ Gate the app behind email/password before any board data is created.
 - [x] Logout / session menu
 - [x] Server-side session read in App Router (`proxy.ts` + `server.ts` helper — Next 16 renamed `middleware.ts` to `proxy.ts`)
 - [x] Route protection: redirect unauthenticated users to `/login`
-- [ ] Verify RLS: a user cannot read another user's boards/cards/attachments (needs a live Supabase project — see Phase 0)
+- [x] Verify RLS: a user cannot read another user's boards/cards/attachments (needs a live Supabase project — see Phase 0)
 
 ---
 
@@ -40,13 +40,13 @@ Gate the app behind email/password before any board data is created.
 
 Replace seed boards with the user's real, persisted boards.
 
-- [ ] Fetch boards for the signed-in user (server component / action)
-- [ ] Create board: name (required) + optional description + accent color picker (preset palette)
-- [ ] Auto-assign a default accent color when skipped
-- [ ] Edit board (name, description, color)
-- [ ] Delete board with confirmation (cascades to cards/attachments)
-- [ ] Dashboard list wired to live data with per-board progress + accent ring
-- [ ] Empty state for a user with zero boards
+- [x] Fetch boards for the signed-in user (server component / action)
+- [x] Create board: name (required) + optional description + accent color picker (preset palette)
+- [x] Auto-assign a default accent color when skipped
+- [x] Edit board (name, description, color)
+- [x] Delete board with confirmation (cascades to cards/attachments)
+- [x] Dashboard list wired to live data with per-board progress + accent ring
+- [x] Empty state for a user with zero boards
 
 ---
 

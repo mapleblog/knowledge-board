@@ -1,10 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/auth"];
+const PUBLIC_PATHS = ["/login", "/signup", "/auth/confirm"];
 
 function isPublicPath(pathname: string) {
-  return PUBLIC_PATHS.some((path) => pathname.startsWith(path));
+  return PUBLIC_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
 }
 
 /**
@@ -36,11 +38,24 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const { pathname } = request.nextUrl;
+
+  let user = null;
+  try {
+    const {
+      data: { user: fetchedUser },
+    } = await supabase.auth.getUser();
+    user = fetchedUser;
+  } catch {
+    // Supabase/network failure: fail safe by treating the request as
+    // unauthenticated rather than letting the error bubble up as a 500.
+    if (!isPublicPath(pathname)) {
+      const redirectUrl = new URL("/login", request.url);
+      redirectUrl.searchParams.set("redirectTo", pathname);
+      return NextResponse.redirect(redirectUrl);
+    }
+    return supabaseResponse;
+  }
 
   if (!user && !isPublicPath(pathname)) {
     const redirectUrl = new URL("/login", request.url);

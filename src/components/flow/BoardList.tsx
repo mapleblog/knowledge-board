@@ -1,6 +1,6 @@
 "use client";
 
-import type { BoardWithCards } from "@/lib/types";
+import type { Board, BoardWithCards } from "@/lib/types";
 import { boardProgress } from "@/lib/board";
 
 type BoardListProps = {
@@ -8,6 +8,8 @@ type BoardListProps = {
   activeId: string;
   onSelect: (id: string) => void;
   onNewBoard: () => void;
+  onEditBoard: (board: Board) => void;
+  onDeleteBoard: (board: Board) => void;
 };
 
 /** Left column: the user's boards, each with an accent ring and progress bar. */
@@ -16,6 +18,8 @@ export default function BoardList({
   activeId,
   onSelect,
   onNewBoard,
+  onEditBoard,
+  onDeleteBoard,
 }: BoardListProps) {
   return (
     <div>
@@ -24,24 +28,43 @@ export default function BoardList({
         {boards.map((board) => {
           const { done, total, pct } = boardProgress(board.cards);
           return (
-            <button
+            <div
               key={board.id}
               className={`b-item${board.id === activeId ? " on" : ""}`}
-              onClick={() => onSelect(board.id)}
             >
-              <span className="ring" style={{ background: board.color }}>
-                {board.name.charAt(0).toUpperCase()}
-              </span>
-              <div style={{ flex: 1 }}>
-                <h4>{board.name}</h4>
-                <p>
-                  {done} of {total} done
-                </p>
-                <div className="progress">
-                  <i style={{ width: `${pct}%`, background: board.color }} />
+              <button type="button" className="b-item-main" onClick={() => onSelect(board.id)}>
+                <span className="ring" style={{ background: board.color }}>
+                  {board.name.charAt(0).toUpperCase()}
+                </span>
+                <div style={{ flex: 1 }}>
+                  <h4>{board.name}</h4>
+                  <p>
+                    {done} of {total} done
+                  </p>
+                  <div className="progress">
+                    <i style={{ width: `${pct}%`, background: board.color }} />
+                  </div>
                 </div>
+              </button>
+              <div className="b-actions">
+                <button
+                  type="button"
+                  className="icon-btn"
+                  aria-label={`Edit ${board.name}`}
+                  onClick={() => onEditBoard(board)}
+                >
+                  ✎
+                </button>
+                <button
+                  type="button"
+                  className="icon-btn"
+                  aria-label={`Delete ${board.name}`}
+                  onClick={() => onDeleteBoard(board)}
+                >
+                  🗑
+                </button>
               </div>
-            </button>
+            </div>
           );
         })}
 

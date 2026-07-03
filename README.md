@@ -14,7 +14,7 @@ system in [`docs/DESIGN.md`](docs/DESIGN.md) (reverse-extracted from
 - **Tailwind CSS v4** + a scoped `.flow` design-system stylesheet in
   `src/app/globals.css`
 - **@dnd-kit** for accessible, touch-capable drag-to-reorder
-- **Supabase** (Postgres + Auth + Storage) — client helpers scaffolded, not yet wired
+- **Supabase** (Postgres + Auth + Storage) — auth and boards are wired to a live project; cards/attachments still pending
 
 ## Getting started
 
@@ -23,9 +23,10 @@ npm install
 npm run dev        # http://localhost:3000
 ```
 
-The app currently renders in-memory seed data (`src/lib/sample-data.ts`) so the
-UI is fully interactive out of the box — switch boards, drag steps to reorder,
-click a timeline node to toggle "done", and add a step.
+Boards are fetched from Supabase for the signed-in user (see `src/app/page.tsx`)
+and are fully CRUD — create, edit, and delete (with confirmation) — via Server
+Actions in `src/lib/board-actions.ts`. Card mutations (reorder, toggle done, add
+step) are still local-only pending Phase 3.
 
 ## Project layout
 
@@ -33,31 +34,33 @@ click a timeline node to toggle "done", and add a step.
 src/
   app/
     globals.css              Flow design tokens + components (ported from the mockup)
-    layout.tsx  page.tsx     Root layout + home (renders the board view)
-  components/flow/
-    KnowledgeBoardApp.tsx    Top-level client shell + local state
-    BoardList.tsx            Left column: boards with accent rings + progress
-    TimelinePath.tsx         Right column: the path + @dnd-kit drag context
-    StepCard.tsx             A single sortable timeline step
+    layout.tsx  page.tsx     Root layout + home (fetches the user's boards)
+    login/  signup/          Auth screens
+  components/
+    auth/SessionMenu.tsx     Top-bar logout
+    flow/
+      KnowledgeBoardApp.tsx  Top-level client shell + local card state
+      BoardList.tsx          Left column: boards with accent rings + progress
+      BoardModal.tsx         Create/edit board form (name, description, color)
+      DeleteBoardModal.tsx   Delete confirmation
+      TimelinePath.tsx       Right column: the path + @dnd-kit drag context
+      StepCard.tsx           A single sortable timeline step
   lib/
     types.ts                 Domain types (mirror the DB schema)
     board.ts                 Progress + status-pill helpers
-    sample-data.ts           Seed data (mirrors docs/mockup.html)
-    supabase/                Browser + server client helpers
+    auth-actions.ts          Sign up / log in / log out Server Actions
+    board-actions.ts         Board create/update/delete Server Actions
+    supabase/                Browser + server client helpers, proxy session refresh
 supabase/
   schema.sql                 Tables + Row-Level Security + updated_at trigger
 docs/                        PRD, design system, and original mockups/wireframes
 ```
 
-## Wiring up Supabase (next steps)
+## Wiring up Supabase
 
 1. Create a Supabase project, then copy `.env.example` → `.env.local` and fill
    in `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 2. Run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL editor
    (creates tables + RLS policies).
-3. Add email/password auth screens and a middleware session refresh.
-4. Replace the `sample-data` reads in `page.tsx` with a Supabase query, and swap
-   the local mutations in `KnowledgeBoardApp.tsx` for server actions with
-   optimistic UI.
 
-See `docs/prd.md` §5 for the phased roadmap.
+See `docs/prd.md` §5 and [`TASKS.md`](TASKS.md) for the phased roadmap.

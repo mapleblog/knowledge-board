@@ -5,24 +5,34 @@ import { createClient } from "@/lib/supabase/server";
 
 export type AuthActionState = { error?: string; message?: string } | null;
 
+function safeRedirectTarget(redirectTo: FormDataEntryValue | null): string {
+  const value = String(redirectTo ?? "");
+  // Only allow same-origin, relative paths — reject protocol-relative ("//host")
+  // and absolute URLs to avoid an open redirect via a spoofed redirectTo.
+  if (value.startsWith("/") && !value.startsWith("//")) {
+    return value;
+  }
+  return "/";
+}
+
 export async function signIn(
   _prevState: AuthActionState,
   formData: FormData
 ): Promise<AuthActionState> {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+  const redirectTo = safeRedirectTarget(formData.get("redirectTo"));
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    if (error.message.toLowerCase().includes("email not confirmed")) {
-      return { error: "Please confirm your email before logging in." };
-    }
+    // Deliberately generic: distinguishing "unconfirmed" from "bad credentials"
+    // lets an attacker enumerate which emails have registered accounts.
     return { error: "Incorrect email or password." };
   }
 
-  redirect("/");
+  redirect(redirectTo);
 }
 
 export async function signUp(
@@ -56,6 +66,11 @@ export async function signUp(
 
 export async function signOut() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    redirect("/login?error=sign-out-failed");
+  }
+
   redirect("/login");
 }

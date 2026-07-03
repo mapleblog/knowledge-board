@@ -1,5 +1,5 @@
 import KnowledgeBoardApp from "@/components/flow/KnowledgeBoardApp";
-import { SAMPLE_BOARDS } from "@/lib/sample-data";
+import type { BoardWithCards } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -10,9 +10,16 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Scaffold: renders seed data. Replace with a Supabase query for the
-  // signed-in user's boards once board/card CRUD is wired up (Phase 2/3).
+  const { data: boards } = await supabase
+    .from("boards")
+    .select("*, cards(*, attachments(*))")
+    .order("created_at", { ascending: true })
+    .order("order_index", { referencedTable: "cards", ascending: true });
+
   return (
-    <KnowledgeBoardApp initialBoards={SAMPLE_BOARDS} userEmail={user?.email} />
+    <KnowledgeBoardApp
+      initialBoards={(boards as BoardWithCards[]) ?? []}
+      userEmail={user?.email}
+    />
   );
 }
