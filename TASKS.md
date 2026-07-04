@@ -196,10 +196,20 @@ signed-upload flow). Findings below, worst first.
 
 ## Phase 6 — Deployment (PRD §3 Deployment)
 
-- [ ] Deploy to Vercel (env vars wired to Supabase)
-- [ ] Configure Supabase Auth redirect/site URLs for the deployed domain
-- [ ] Smoke test the full flow on production (sign up → board → card → attachment → reorder)
-- [ ] Document free-tier limits + upgrade path in README
+- [ ] Deploy to Vercel (env vars wired to Supabase) — **config prepared** (see
+  README "Deploying to Vercel"): app is zero-config for Vercel (no `vercel.json`
+  needed), the only two env vars are documented, and the auth confirm route
+  already uses the request origin so it works on any domain. Remaining is the
+  manual action: push to GitHub, import in Vercel, set the two env vars, deploy.
+- [ ] Configure Supabase Auth redirect/site URLs for the deployed domain —
+  **documented** (README): set Site URL + Redirect URLs (incl. a localhost and a
+  preview-subdomain wildcard) once the Vercel domain exists. Dashboard-only step.
+- [ ] Smoke test the full flow on production (sign up → board → card → attachment → reorder) — depends on the deploy above; the exact click-through is scripted in README "Production smoke test".
+- [x] Document free-tier limits + upgrade path in README — done: README now has
+  "Free-tier limits & upgrade path" (Supabase Free: ~1-week inactivity pause,
+  500 MB DB / 1 GB Storage / 5 GB egress, leaked-password check needs Pro →
+  Pro ~$25/mo; Vercel Hobby: personal-use, 100 GB bandwidth → Pro ~$20/mo), plus
+  a full "Deploying to Vercel" section and refreshed feature/layout docs.
 
 ---
 
