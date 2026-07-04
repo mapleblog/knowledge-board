@@ -25,6 +25,10 @@ export default function BoardList({
     <div>
       <div className="subhead">Boards</div>
       <div className="board-list">
+        <button className="new-board" onClick={onNewBoard}>
+          + New board
+        </button>
+
         {boards.map((board) => {
           const { done, total, pct } = boardProgress(board.cards);
           return (
@@ -67,10 +71,6 @@ export default function BoardList({
             </div>
           );
         })}
-
-        <button className="new-board" onClick={onNewBoard}>
-          + New board
-        </button>
       </div>
     </div>
   );

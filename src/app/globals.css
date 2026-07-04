@@ -58,18 +58,7 @@ body {
   gap: 12px;
   margin-bottom: 24px;
 }
-/* New-board icon button lives in the navbar, next to the brand */
-.flow .nav-new {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 0;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 0;
-}
-/* Everything after the new-board button is pushed to the right edge */
+/* Brand sits at the left; the actions below are pushed to the right edge */
 .flow .nav-toggle,
 .flow .top-actions {
   margin-left: auto;
@@ -514,22 +503,27 @@ body {
 .flow .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   font-size: 12px;
+  font-weight: 600;
   color: var(--muted);
 }
 .flow .field input {
   font-family: var(--font);
   font-size: 14px;
+  font-weight: 400;
   color: var(--ink);
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--bg);
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #f2f3f8;
+  transition: 0.15s;
 }
 .flow .field input:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: -1px;
+  outline: none;
+  background: var(--panel);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
 }
 .flow .auth-form .btn {
   margin-left: 0;
@@ -597,16 +591,21 @@ body {
 .flow .field textarea {
   font-family: var(--font);
   font-size: 14px;
+  font-weight: 400;
   color: var(--ink);
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--bg);
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #f2f3f8;
   resize: vertical;
+  min-height: 76px;
+  transition: 0.15s;
 }
 .flow .field textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: -1px;
+  outline: none;
+  background: var(--panel);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
 }
 .flow .color-field {
   border: 0;
@@ -619,6 +618,7 @@ body {
 .flow .color-field legend {
   padding: 0;
   font-size: 12px;
+  font-weight: 600;
   color: var(--muted);
 }
 .flow .color-swatches {
@@ -655,7 +655,9 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
 }
 .flow .modal-actions .btn {
   margin-left: 0;
