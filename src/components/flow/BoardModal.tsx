@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useId, useRef } from "react";
 import { BOARD_COLORS, type Board } from "@/lib/types";
 import { createBoard, updateBoard } from "@/lib/board-actions";
+import Modal from "./Modal";
 
 type BoardModalProps = {
   /** Omit to create a new board; pass a board to edit it. */
@@ -17,6 +18,7 @@ export default function BoardModal({ board, onClose }: BoardModalProps) {
     null
   );
   const wasPending = useRef(false);
+  const titleId = useId();
 
   useEffect(() => {
     if (wasPending.current && !pending && !state?.error) {
@@ -26,9 +28,8 @@ export default function BoardModal({ board, onClose }: BoardModalProps) {
   }, [pending, state, onClose]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>{board ? "Edit board" : "New board"}</h2>
+    <Modal onClose={onClose} labelledBy={titleId}>
+      <h2 id={titleId}>{board ? "Edit board" : "New board"}</h2>
         <form action={formAction} className="auth-form">
           {board && <input type="hidden" name="id" value={board.id} />}
           <label className="field">
@@ -55,6 +56,7 @@ export default function BoardModal({ board, onClose }: BoardModalProps) {
                     type="radio"
                     name="color"
                     value={color}
+                    aria-label={`Accent color ${i + 1}`}
                     defaultChecked={board ? board.color === color : i === 0}
                   />
                 </label>
@@ -73,7 +75,6 @@ export default function BoardModal({ board, onClose }: BoardModalProps) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

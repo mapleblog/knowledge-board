@@ -92,7 +92,19 @@ The core "learning path" loop, persisted.
   (`.path-empty`) for a board with zero steps. Board-level empty state (Phase 2)
   and mutation error/pending states (delete modals, reorder/status banner,
   modal "Saving…") already existed
-- [ ] Accessibility pass (keyboard drag, focus traps in modals, labels)
+- [x] Accessibility pass (keyboard drag, focus traps in modals, labels) — new
+  shared `Modal` primitive (`Modal.tsx`) gives every dialog `role="dialog"` +
+  `aria-modal` + `aria-labelledby`, a Tab focus trap, Escape-to-close, and
+  focus restoration to the trigger on close; all five modals (board/card
+  create-edit, card detail, delete board/card) refactored onto it (also removes
+  the copy-pasted overlay markup). Timeline status node is now a real
+  `<button>` with an `aria-label` (was a click-only `<span>` with just a
+  `title`), so status cycling is keyboard-operable; added a `:focus-visible`
+  ring. Board accent swatches got per-radio `aria-label`s + a keyboard focus
+  ring. Keyboard drag-reorder was already wired via @dnd-kit's `KeyboardSensor`.
+  `tsc`/`eslint`/`next build` clean; dev-server smoke passed (routes serve, no
+  runtime errors). Note: the interactive focus-trap/Escape flow is auth-gated,
+  so click-through in a browser is still worth a manual pass
 - [ ] New-user path: create board + first card in under 2 minutes, no tutorial
 
 ---

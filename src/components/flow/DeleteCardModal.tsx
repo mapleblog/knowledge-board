@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useId, useRef } from "react";
 import type { Card } from "@/lib/types";
 import { deleteCard } from "@/lib/card-actions";
+import Modal from "./Modal";
 
 type DeleteCardModalProps = {
   card: Card;
@@ -13,6 +14,7 @@ type DeleteCardModalProps = {
 export default function DeleteCardModal({ card, onClose }: DeleteCardModalProps) {
   const [state, formAction, pending] = useActionState(deleteCard, null);
   const wasPending = useRef(false);
+  const titleId = useId();
 
   useEffect(() => {
     if (wasPending.current && !pending && !state?.error) {
@@ -22,9 +24,8 @@ export default function DeleteCardModal({ card, onClose }: DeleteCardModalProps)
   }, [pending, state, onClose]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Delete &ldquo;{card.title}&rdquo;?</h2>
+    <Modal onClose={onClose} labelledBy={titleId}>
+      <h2 id={titleId}>Delete &ldquo;{card.title}&rdquo;?</h2>
         <p className="tag">This permanently deletes the step. This can&rsquo;t be undone.</p>
         <form action={formAction}>
           <input type="hidden" name="id" value={card.id} />
@@ -38,7 +39,6 @@ export default function DeleteCardModal({ card, onClose }: DeleteCardModalProps)
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

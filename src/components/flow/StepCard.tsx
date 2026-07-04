@@ -59,7 +59,13 @@ export default function StepCard({
 
   return (
     <div ref={setNodeRef} style={style} className={`step${stepClass}`}>
-      <span className="node" onClick={() => onCycleStatus(card.id)} title={nextLabel} />
+      <button
+        type="button"
+        className="node"
+        onClick={() => onCycleStatus(card.id)}
+        aria-label={nextLabel}
+        title={nextLabel}
+      />
       <div
         className={`card${isDragging ? " dragging" : ""}`}
         {...attributes}

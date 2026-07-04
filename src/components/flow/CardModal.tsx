@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useId, useRef } from "react";
 import type { Card } from "@/lib/types";
 import { createCard, updateCard } from "@/lib/card-actions";
+import Modal from "./Modal";
 
 type CardModalProps = {
   boardId: string;
@@ -18,6 +19,7 @@ export default function CardModal({ boardId, card, onClose }: CardModalProps) {
     null
   );
   const wasPending = useRef(false);
+  const titleId = useId();
 
   useEffect(() => {
     if (wasPending.current && !pending && !state?.error) {
@@ -27,9 +29,8 @@ export default function CardModal({ boardId, card, onClose }: CardModalProps) {
   }, [pending, state, onClose]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>{card ? "Edit step" : "New step"}</h2>
+    <Modal onClose={onClose} labelledBy={titleId}>
+      <h2 id={titleId}>{card ? "Edit step" : "New step"}</h2>
         <form action={formAction} className="auth-form">
           {card ? (
             <input type="hidden" name="id" value={card.id} />
@@ -67,7 +68,6 @@ export default function CardModal({ boardId, card, onClose }: CardModalProps) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

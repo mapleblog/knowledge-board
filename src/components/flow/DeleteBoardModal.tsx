@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useId, useRef } from "react";
 import type { Board } from "@/lib/types";
 import { deleteBoard } from "@/lib/board-actions";
+import Modal from "./Modal";
 
 type DeleteBoardModalProps = {
   board: Board;
@@ -14,6 +15,7 @@ type DeleteBoardModalProps = {
 export default function DeleteBoardModal({ board, cardCount, onClose }: DeleteBoardModalProps) {
   const [state, formAction, pending] = useActionState(deleteBoard, null);
   const wasPending = useRef(false);
+  const titleId = useId();
 
   useEffect(() => {
     if (wasPending.current && !pending && !state?.error) {
@@ -23,9 +25,8 @@ export default function DeleteBoardModal({ board, cardCount, onClose }: DeleteBo
   }, [pending, state, onClose]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Delete &ldquo;{board.name}&rdquo;?</h2>
+    <Modal onClose={onClose} labelledBy={titleId}>
+      <h2 id={titleId}>Delete &ldquo;{board.name}&rdquo;?</h2>
         <p className="tag">
           This permanently deletes the board{cardCount > 0 ? ` and its ${cardCount} card${cardCount === 1 ? "" : "s"}` : ""}. This can&rsquo;t be undone.
         </p>
@@ -41,7 +42,6 @@ export default function DeleteBoardModal({ board, cardCount, onClose }: DeleteBo
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { CardWithAttachments } from "@/lib/types";
 import { linkLabel, statusPill } from "@/lib/board";
 import { getAttachmentUrls } from "@/lib/attachment-actions";
 import AttachmentItem from "./AttachmentItem";
 import AttachmentUploader from "./AttachmentUploader";
+import Modal from "./Modal";
 
 type CardDetailModalProps = {
   card: CardWithAttachments;
@@ -17,6 +18,7 @@ type CardDetailModalProps = {
 /** Full card detail view: description, clickable URL, attachments, edit/delete. */
 export default function CardDetailModal({ card, onClose, onEdit, onDelete }: CardDetailModalProps) {
   const pill = statusPill(card.status);
+  const titleId = useId();
   const [urls, setUrls] = useState<Record<string, string | null>>({});
   // One signed-URL fetch for all attachments; keyed on the paths (not the
   // array identity) so board refetches don't re-sign unchanged attachments.
@@ -36,9 +38,8 @@ export default function CardDetailModal({ card, onClose, onEdit, onDelete }: Car
   }, [pathsKey]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>{card.title}</h2>
+    <Modal onClose={onClose} labelledBy={titleId}>
+      <h2 id={titleId}>{card.title}</h2>
         <span className={`mini${pill.accent ? " accent" : ""}`}>{pill.label}</span>
 
         {card.description && <p className="tag">{card.description}</p>}
@@ -74,7 +75,6 @@ export default function CardDetailModal({ card, onClose, onEdit, onDelete }: Car
             Close
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
