@@ -55,7 +55,7 @@ export async function signUp(
     // leak the same fact). An existing account gets the identical "check
     // your inbox" response a fresh sign-up gets.
     if (error.message.toLowerCase().includes("already registered")) {
-      return { message: "Check your inbox to confirm your email, then log in." };
+      return { message: "Check your inbox and click the confirmation link to finish setting up your account." };
     }
     return { error: "Could not create the account. Please try again." };
   }

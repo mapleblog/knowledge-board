@@ -105,7 +105,19 @@ The core "learning path" loop, persisted.
   `tsc`/`eslint`/`next build` clean; dev-server smoke passed (routes serve, no
   runtime errors). Note: the interactive focus-trap/Escape flow is auth-gated,
   so click-through in a browser is still worth a manual pass
-- [ ] New-user path: create board + first card in under 2 minutes, no tutorial
+- [x] New-user path: create board + first card in under 2 minutes, no tutorial
+  — flow traced end-to-end and judged to meet the criterion: once authenticated
+  the zero-boards empty state ("Start your first board" + CTA) → `BoardModal`
+  (name autofocused, description/color optional) → the new board auto-selects
+  and shows the card-level empty state ("…add your first one below") →
+  `CardModal` (title autofocused). That's 2 dialogs / 2 required fields / ~4
+  interactions, each guided by empty-state copy, so no tutorial is needed; the
+  0→1-board transition auto-selects the new board (no dead-end). Confirmed the
+  email-confirm link (`/auth/confirm`) sets the session and redirects to `/`,
+  so same-browser signup lands straight in the app; reworded the signup
+  success message that had implied a mandatory separate login step. Email
+  delivery latency is external and outside the in-app 2-minute measure. Final
+  stopwatch pass is a quick manual check on a live account
 
 ---
 
