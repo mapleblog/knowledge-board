@@ -10,6 +10,26 @@ export type BoardColor = (typeof BOARD_COLORS)[number];
 /** A card's progress through the learning path. Drives the timeline node state. */
 export type CardStatus = "todo" | "in_progress" | "done";
 
+/**
+ * Narrow untrusted input (form value, DB text column) to a preset board
+ * color, falling back to the default palette color.
+ */
+export function resolveBoardColor(value: unknown): BoardColor {
+  const raw = String(value ?? "");
+  return (BOARD_COLORS as readonly string[]).includes(raw)
+    ? (raw as BoardColor)
+    : BOARD_COLORS[0];
+}
+
+/**
+ * Narrow a DB text column to a CardStatus. The `cards.status` check
+ * constraint already guarantees one of the three values; "todo" is the
+ * defensive fallback.
+ */
+export function resolveCardStatus(value: string): CardStatus {
+  return value === "in_progress" || value === "done" ? value : "todo";
+}
+
 export interface Board {
   id: string;
   user_id: string;
@@ -43,7 +63,10 @@ export interface Attachment {
   mime_type: string;
 }
 
+/** A card plus its attachments, as passed around the board UI. */
+export type CardWithAttachments = Card & { attachments: Attachment[] };
+
 /** A board with its ordered cards + attachments, as rendered on the board view. */
 export interface BoardWithCards extends Board {
-  cards: (Card & { attachments: Attachment[] })[];
+  cards: CardWithAttachments[];
 }

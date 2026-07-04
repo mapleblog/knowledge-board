@@ -61,7 +61,7 @@ The core "learning path" loop, persisted.
 - [x] Delete card with confirmation
 - [x] Persist drag-reorder via fractional `order_index` (single-row write per move)
 - [x] Optimistic UI on reorder; debounced write; survives page reload
-- [ ] Verify reorder works on touch (phone-sized viewport)
+- [x] Verify reorder works on touch (phone-sized viewport) — verified 2026-07-03 via devtools touch emulation (press-hold drag reorders; swipe still scrolls)
 
 ---
 
@@ -79,10 +79,86 @@ The core "learning path" loop, persisted.
 
 ## Phase 5 — Responsive & polish (PRD §2 Responsive, success criteria)
 
-- [ ] Full drag-reorder + CRUD verified on a phone-sized viewport (touch)
+- [x] Full drag-reorder + CRUD verified on a phone-sized viewport (touch) — board/card CRUD and touch drag-reorder all confirmed 2026-07-03
+- [x] Fix: mobile top bar (brand / "+ New board" / session menu) crowded and overlapped below 520px — the earlier two-row wrap still overflowed row 2 on narrow phones, so the top bar is now a navbar: on ≤520px the actions collapse into a hamburger-toggled dropdown; desktop layout unchanged (`KnowledgeBoardApp.tsx`, `src/app/globals.css`)
+- [x] Fix: hydration mismatch from `@dnd-kit`'s auto-generated `aria-describedby` instance ids not matching between SSR and client — pinned via explicit `DndContext` `id={`path-${boardId}`}` (`TimelinePath.tsx`, `KnowledgeBoardApp.tsx`)
+- [x] Fix: drag handle too narrow — reordering required grabbing the small ⋮⋮ grip. The whole card is now the drag handle (5px pointer activation keeps clicks working, click-after-drag guard keeps the detail modal from opening on drop, `touch-action: manipulation` keeps touch scrolling working); grip is decorative (`StepCard.tsx`, `globals.css`)
 - [ ] Loading / error / empty states across boards and cards
 - [ ] Accessibility pass (keyboard drag, focus traps in modals, labels)
 - [ ] New-user path: create board + first card in under 2 minutes, no tutorial
+
+---
+
+## Code review follow-ups (2026-07-03 quality & architecture check)
+
+Static checks (`tsc --noEmit`, `eslint`) clean. Architecture judged sound
+(server actions / components / types layering, RLS + server-side re-checks,
+signed-upload flow). Findings below, worst first.
+
+**Bugs**
+
+- [x] Fix: rapid reorders lose writes — `KnowledgeBoardApp.tsx` used one shared
+  `reorderTimeout` not keyed by card, so dragging card A then card B within
+  300ms cancelled A's pending `reorderCard` write (A snapped back after the
+  next refetch). Fixed: pending writes now keyed per card id in a
+  `pendingReorders` Map, and any still-debounced writes are flushed on unmount
+- [x] Surface errors from fire-and-forget actions (`deleteBoard`, `deleteCard`,
+  `reorderCard`, `updateCardStatus`, `deleteAttachment`) — they swallowed
+  Supabase errors and returned `void`, so failures looked like success until
+  the next refetch. Fixed: all five now return `{ error }` state; the delete
+  modals + attachment row use `useActionState` (stay open / show the error,
+  pending label on the button), and reorder/status-toggle errors surface in a
+  dismissible `.save-error` banner in `KnowledgeBoardApp`. `reorderCard` /
+  `updateCardStatus` also revalidate on failure so the optimistic UI snaps
+  back to server truth
+- [x] Decide on `in_progress`: the node toggle only flipped done ↔ todo, so
+  `in_progress` (and its pill style) was unreachable dead state. Fixed by
+  making it reachable: clicking a timeline node now cycles
+  next up → in progress → done → next up (`STATUS_CYCLE` in
+  `KnowledgeBoardApp.tsx`), with an inner-dot node style for in-progress
+  (`.step.in-progress` in `globals.css`) and a status-aware tooltip on the
+  node (`StepCard.tsx`)
+
+**Quality / consistency**
+
+- [x] Deduplicate `PathCard` (was defined in `KnowledgeBoardApp.tsx`,
+  `TimelinePath.tsx`, `StepCard.tsx`; inlined again in `BoardWithCards` and
+  `CardDetailModal`) — now a single exported `CardWithAttachments` in
+  `src/lib/types.ts`, used everywhere
+- [x] Type the Supabase client with generated DB types and drop the
+  `boards as BoardWithCards[]` cast in `page.tsx`. Done: DB types generated
+  from the live project into `src/lib/supabase/database.types.ts` (regenerate
+  after schema changes), browser/server clients are now
+  `create*Client<Database>`, and `page.tsx` narrows the text `color`/`status`
+  columns to the domain unions via `resolveBoardColor`/`resolveCardStatus`
+  (new in `types.ts`; `board-actions.ts` reuses the color resolver)
+- [x] Align signup with login's anti-enumeration stance — signup returned
+  "already exists" and raw `error.message` (`auth-actions.ts`). Fixed: an
+  already-registered email now gets the identical "Check your inbox…" message
+  a fresh sign-up gets, and other Supabase errors return a generic "Could not
+  create the account" instead of echoing `error.message`
+- [x] Low: batch `getAttachmentUrl` calls (was one server action per
+  attachment on card-detail open). Fixed: `getAttachmentUrls(paths[])` signs
+  all of a card's attachments in one `createSignedUrls` storage call, fetched
+  once by `CardDetailModal` (keyed on the path list, so board refetches don't
+  re-sign unchanged attachments) and passed down to a now-presentational
+  `AttachmentItem`
+- [x] Low: note fractional `order_index` limits in `schema.sql` — done: the
+  column comment now documents the no-rebalancing float-exhaustion limit
+  (~50 midpoint splits into one gap; fix is renumbering 1..n) and the
+  `createCard` max+1 read-then-insert race across sessions (harmless beyond
+  nondeterministic ordering; resolved by the next drag)
+- [x] Cosmetic: `linkLabel` showed "co" for `example.co.uk` (`board.ts`) —
+  fixed with a small two-part public-suffix heuristic (co/com/net/org/gov/
+  edu/ac + 2-letter ccTLD steps one label left); verified against
+  example.co.uk, bbc.co.uk, amazon.com.au, github.com, localhost
+- [~] Supabase advisor follow-ups (also in STATUS.md): `search_path` on
+  `public.touch_updated_at` is now pinned empty — applied to the live project
+  as migration `pin_search_path_on_touch_updated_at` and mirrored in
+  `supabase/schema.sql`; advisor warning gone. Leaked-password protection is
+  an Auth dashboard toggle with no API/SQL surface — enable manually:
+  Dashboard → Authentication → Sign In / Providers → Passwords → "Prevent use
+  of leaked passwords" (may require the Pro plan)
 
 ---
 

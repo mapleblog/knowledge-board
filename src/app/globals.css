@@ -50,27 +50,86 @@ body {
     inset 0 0 0 1px #eef0f5;
 }
 
-/* ---- Top bar ---- */
+/* ---- Top bar / navbar ---- */
 .flow .top {
+  position: relative;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  row-gap: 10px;
+  gap: 12px;
   margin-bottom: 24px;
 }
+/* New-board icon button lives in the navbar, next to the brand */
+.flow .nav-new {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 0;
+}
+/* Everything after the new-board button is pushed to the right edge */
+.flow .nav-toggle,
+.flow .top-actions {
+  margin-left: auto;
+}
+.flow .top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Hamburger toggle — hidden on desktop, shown on the mobile navbar */
+.flow .nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 40px;
+  height: 40px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+.flow .nav-toggle span {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
 @media (max-width: 520px) {
-  .flow .top {
-    justify-content: space-between;
+  .flow .nav-toggle {
+    display: flex;
   }
-  .flow .top .brand {
-    flex: 1 1 100%;
+  /* Collapse the remaining actions into a dropdown anchored to the navbar */
+  .flow .top-actions {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 30;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 200px;
+    padding: 10px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px -20px rgba(20, 24, 60, 0.4);
   }
-  .flow .btn {
+  .flow .top-actions.open {
+    display: flex;
+  }
+  .flow .top-actions .session-menu {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
     margin-left: 0;
   }
-  .flow .session-menu,
-  .flow .av {
-    margin-left: 0;
+  .flow .top-actions .session-email {
+    max-width: none;
   }
 }
 .flow .brand {
@@ -314,6 +373,13 @@ body {
   border: 3px solid var(--accent);
   z-index: 2;
 }
+.flow .step.in-progress .node::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--accent);
+}
 .flow .step.done .node {
   background: var(--accent);
 }
@@ -331,6 +397,9 @@ body {
   border-radius: 13px;
   padding: 14px 16px;
   cursor: grab;
+  /* Whole card is the drag handle; `manipulation` (not `none`) keeps page
+     scrolling working on touch — the delayed TouchSensor handles drags. */
+  touch-action: manipulation;
   transition: 0.12s;
 }
 .flow .card:hover {
@@ -348,9 +417,7 @@ body {
 .flow .card .grip {
   color: #c4c8d4;
   letter-spacing: -2px;
-  cursor: grab;
   font-size: 15px;
-  touch-action: none;
 }
 .flow .card h5 {
   margin: 0;
@@ -464,6 +531,19 @@ body {
   margin: 0;
   font-size: 12px;
   color: #ef4444;
+}
+.flow .save-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 10px;
+  font-size: 12px;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
 }
 .flow .auth-message {
   margin: 0;

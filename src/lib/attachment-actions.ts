@@ -116,27 +116,51 @@ export async function confirmAttachment(
   return null;
 }
 
-export async function deleteAttachment(formData: FormData): Promise<void> {
+export async function deleteAttachment(
+  _prevState: AttachmentActionState,
+  formData: FormData
+): Promise<AttachmentActionState> {
   const id = String(formData.get("id") ?? "");
   const filePath = String(formData.get("file_path") ?? "");
-  if (!id) return;
+  if (!id) {
+    return { error: "Missing attachment." };
+  }
 
   const supabase = await createClient();
-  await supabase.from("attachments").delete().eq("id", id);
+  const { error } = await supabase.from("attachments").delete().eq("id", id);
+  if (error) {
+    return { error: "Could not delete attachment. Please try again." };
+  }
   if (filePath) {
     await supabase.storage.from(ATTACHMENTS_BUCKET).remove([filePath]);
   }
 
   revalidatePath("/");
+  return null;
 }
 
-/** Short-lived signed URL for previewing/downloading a private attachment. */
-export async function getAttachmentUrl(filePath: string): Promise<string | null> {
-  if (!filePath) return null;
+/**
+ * Short-lived signed URLs for previewing/downloading private attachments,
+ * keyed by file path. One storage call for the whole card, not one per
+ * attachment; paths that fail to sign map to null.
+ */
+export async function getAttachmentUrls(
+  filePaths: string[]
+): Promise<Record<string, string | null>> {
+  const paths = filePaths.filter(Boolean);
+  if (paths.length === 0) return {};
+
   const supabase = await createClient();
   const { data, error } = await supabase.storage
     .from(ATTACHMENTS_BUCKET)
-    .createSignedUrl(filePath, 3600);
-  if (error || !data) return null;
-  return data.signedUrl;
+    .createSignedUrls(paths, 3600);
+
+  const urls: Record<string, string | null> = {};
+  for (const path of paths) urls[path] = null;
+  if (!error && data) {
+    for (const entry of data) {
+      if (entry.path && !entry.error) urls[entry.path] = entry.signedUrl;
+    }
+  }
+  return urls;
 }

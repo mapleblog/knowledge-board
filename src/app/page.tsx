@@ -1,5 +1,9 @@
 import KnowledgeBoardApp from "@/components/flow/KnowledgeBoardApp";
-import type { BoardWithCards } from "@/lib/types";
+import {
+  resolveBoardColor,
+  resolveCardStatus,
+  type BoardWithCards,
+} from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -16,10 +20,16 @@ export default async function Home() {
     .order("created_at", { ascending: true })
     .order("order_index", { referencedTable: "cards", ascending: true });
 
-  return (
-    <KnowledgeBoardApp
-      initialBoards={(boards as BoardWithCards[]) ?? []}
-      userEmail={user?.email}
-    />
-  );
+  // The DB stores color/status as text (checked by constraints); narrow them
+  // to the domain unions here so the rest of the app gets real types.
+  const initialBoards: BoardWithCards[] = (boards ?? []).map((board) => ({
+    ...board,
+    color: resolveBoardColor(board.color),
+    cards: board.cards.map((card) => ({
+      ...card,
+      status: resolveCardStatus(card.status),
+    })),
+  }));
+
+  return <KnowledgeBoardApp initialBoards={initialBoards} userEmail={user?.email} />;
 }

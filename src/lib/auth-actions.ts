@@ -50,13 +50,19 @@ export async function signUp(
   const { data, error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
+    // Same anti-enumeration stance as signIn: never reveal whether the email
+    // is already registered, and never echo Supabase's raw message (it can
+    // leak the same fact). An existing account gets the identical "check
+    // your inbox" response a fresh sign-up gets.
     if (error.message.toLowerCase().includes("already registered")) {
-      return { error: "An account with this email already exists." };
+      return { message: "Check your inbox to confirm your email, then log in." };
     }
-    return { error: error.message };
+    return { error: "Could not create the account. Please try again." };
   }
 
   // Email confirmation required: session is null until the user confirms.
+  // (Supabase also takes this path for existing confirmed emails when
+  // confirmations are on — it returns a stub user instead of an error.)
   if (!data.session) {
     return { message: "Check your inbox to confirm your email, then log in." };
   }

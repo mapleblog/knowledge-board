@@ -2,16 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { BOARD_COLORS, type BoardColor } from "@/lib/types";
+import { resolveBoardColor } from "@/lib/types";
 
 export type BoardActionState = { error?: string } | null;
-
-function resolveColor(raw: FormDataEntryValue | null): BoardColor {
-  const value = String(raw ?? "");
-  return (BOARD_COLORS as readonly string[]).includes(value)
-    ? (value as BoardColor)
-    : BOARD_COLORS[0];
-}
 
 export async function createBoard(
   _prevState: BoardActionState,
@@ -19,7 +12,7 @@ export async function createBoard(
 ): Promise<BoardActionState> {
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  const color = resolveColor(formData.get("color"));
+  const color = resolveBoardColor(formData.get("color"));
 
   if (!name) {
     return { error: "Board name is required." };
@@ -55,7 +48,7 @@ export async function updateBoard(
   const id = String(formData.get("id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  const color = resolveColor(formData.get("color"));
+  const color = resolveBoardColor(formData.get("color"));
 
   if (!id) {
     return { error: "Missing board." };
@@ -78,12 +71,22 @@ export async function updateBoard(
   return null;
 }
 
-export async function deleteBoard(formData: FormData): Promise<void> {
+export async function deleteBoard(
+  _prevState: BoardActionState,
+  formData: FormData
+): Promise<BoardActionState> {
   const id = String(formData.get("id") ?? "");
-  if (!id) return;
+  if (!id) {
+    return { error: "Missing board." };
+  }
 
   const supabase = await createClient();
-  await supabase.from("boards").delete().eq("id", id);
+  const { error } = await supabase.from("boards").delete().eq("id", id);
+
+  if (error) {
+    return { error: "Could not delete board. Please try again." };
+  }
 
   revalidatePath("/");
+  return null;
 }

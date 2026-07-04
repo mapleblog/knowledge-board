@@ -16,21 +16,20 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type { Attachment, Card } from "@/lib/types";
+import type { CardWithAttachments } from "@/lib/types";
 import StepCard from "./StepCard";
-
-type PathCard = Card & { attachments: Attachment[] };
 
 type TimelinePathProps = {
   boardId: string;
   title: string;
-  cards: PathCard[];
-  onReorder: (cards: PathCard[], movedId: string, movedIndex: number) => void;
-  onToggleDone: (id: string) => void;
+  cards: CardWithAttachments[];
+  onReorder: (cards: CardWithAttachments[], movedId: string, movedIndex: number) => void;
+  /** Advance the card's status one step (next up → in progress → done → next up). */
+  onCycleStatus: (id: string) => void;
   onAddStep: () => void;
-  onOpenDetail: (card: PathCard) => void;
-  onEditCard: (card: PathCard) => void;
-  onDeleteCard: (card: PathCard) => void;
+  onOpenDetail: (card: CardWithAttachments) => void;
+  onEditCard: (card: CardWithAttachments) => void;
+  onDeleteCard: (card: CardWithAttachments) => void;
 };
 
 /**
@@ -42,7 +41,7 @@ export default function TimelinePath({
   title,
   cards,
   onReorder,
-  onToggleDone,
+  onCycleStatus,
   onAddStep,
   onOpenDetail,
   onEditCard,
@@ -88,7 +87,7 @@ export default function TimelinePath({
             <StepCard
               key={card.id}
               card={card}
-              onToggleDone={onToggleDone}
+              onCycleStatus={onCycleStatus}
               onOpenDetail={onOpenDetail}
               onEdit={onEditCard}
               onDelete={onDeleteCard}

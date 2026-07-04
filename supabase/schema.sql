@@ -22,6 +22,15 @@ create table if not exists public.cards (
   status      text not null default 'todo'
                 check (status in ('todo', 'in_progress', 'done')),
   -- Fractional index so a single drag only rewrites the moved row.
+  -- Known limits (accepted for MVP, revisit post-MVP):
+  --  * No rebalancing: each drop between two neighbors halves the gap, so
+  --    ~50 consecutive drops into the same gap exhaust double precision and
+  --    two rows end up with equal indexes (order then falls back to row
+  --    order, unstable). Fix if hit: renumber the board's cards 1..n.
+  --  * New cards are appended as max(order_index)+1 via a read-then-insert
+  --    (src/lib/card-actions.ts), which can race across two sessions and
+  --    produce duplicate indexes. Harmless beyond nondeterministic ordering
+  --    of the two cards; the next drag of either card resolves it.
   order_index double precision not null default 0,
   icon        text,
   created_at  timestamptz not null default now(),
@@ -76,8 +85,13 @@ create policy "own attachments" on public.attachments
 
 -- ---------- updated_at trigger ----------
 
+-- search_path pinned empty so the trigger can't be hijacked by objects in a
+-- schema that shadows pg_catalog names (Supabase security advisor).
 create or replace function public.touch_updated_at()
-returns trigger language plpgsql as $$
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
 begin
   new.updated_at = now();
   return new;
@@ -94,6 +108,10 @@ create trigger cards_touch_updated_at
 -- bucket, "Public" OFF) in the Supabase dashboard, then run the policies
 -- below. Objects are stored as "{card_id}/{uuid}-{filename}", so ownership
 -- is checked by tracing the card_id path segment back to the owning board.
+-- NB: the object path must be written as "objects.name" — an unqualified
+-- "name" resolves to boards.name inside the EXISTS subquery and the check
+-- always fails (fixed live via migration
+-- fix_attachment_policies_qualify_object_name).
 
 create policy "own attachment objects select" on storage.objects
   for select using (
@@ -101,7 +119,7 @@ create policy "own attachment objects select" on storage.objects
     and exists (
       select 1 from public.cards c
       join public.boards b on b.id = c.board_id
-      where c.id::text = (storage.foldername(name))[1]
+      where c.id::text = (storage.foldername(objects.name))[1]
         and b.user_id = auth.uid()
     )
   );
@@ -112,7 +130,7 @@ create policy "own attachment objects insert" on storage.objects
     and exists (
       select 1 from public.cards c
       join public.boards b on b.id = c.board_id
-      where c.id::text = (storage.foldername(name))[1]
+      where c.id::text = (storage.foldername(objects.name))[1]
         and b.user_id = auth.uid()
     )
   );
@@ -123,7 +141,7 @@ create policy "own attachment objects delete" on storage.objects
     and exists (
       select 1 from public.cards c
       join public.boards b on b.id = c.board_id
-      where c.id::text = (storage.foldername(name))[1]
+      where c.id::text = (storage.foldername(objects.name))[1]
         and b.user_id = auth.uid()
     )
   );

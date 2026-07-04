@@ -86,31 +86,64 @@ export async function updateCard(
   return null;
 }
 
-export async function deleteCard(formData: FormData): Promise<void> {
+export async function deleteCard(
+  _prevState: CardActionState,
+  formData: FormData
+): Promise<CardActionState> {
   const id = String(formData.get("id") ?? "");
-  if (!id) return;
+  if (!id) {
+    return { error: "Missing card." };
+  }
 
   const supabase = await createClient();
-  await supabase.from("cards").delete().eq("id", id);
+  const { error } = await supabase.from("cards").delete().eq("id", id);
+
+  if (error) {
+    return { error: "Could not delete card. Please try again." };
+  }
 
   revalidatePath("/");
+  return null;
 }
 
 /** Persists a single card's new position after a drag-reorder. */
-export async function reorderCard(id: string, orderIndex: number): Promise<void> {
-  if (!id) return;
+export async function reorderCard(id: string, orderIndex: number): Promise<CardActionState> {
+  if (!id) {
+    return { error: "Missing card." };
+  }
 
   const supabase = await createClient();
-  await supabase.from("cards").update({ order_index: orderIndex }).eq("id", id);
+  const { error } = await supabase
+    .from("cards")
+    .update({ order_index: orderIndex })
+    .eq("id", id);
 
+  // Revalidate even on failure so the optimistic client order snaps back to
+  // the server's truth instead of silently keeping an unsaved order.
   revalidatePath("/");
+
+  if (error) {
+    return { error: "Could not save the new order. Please try again." };
+  }
+  return null;
 }
 
-export async function updateCardStatus(id: string, status: CardStatus): Promise<void> {
-  if (!id) return;
+export async function updateCardStatus(
+  id: string,
+  status: CardStatus
+): Promise<CardActionState> {
+  if (!id) {
+    return { error: "Missing card." };
+  }
 
   const supabase = await createClient();
-  await supabase.from("cards").update({ status }).eq("id", id);
+  const { error } = await supabase.from("cards").update({ status }).eq("id", id);
 
+  // Revalidate even on failure so the optimistic toggle snaps back.
   revalidatePath("/");
+
+  if (error) {
+    return { error: "Could not update the step's status. Please try again." };
+  }
+  return null;
 }

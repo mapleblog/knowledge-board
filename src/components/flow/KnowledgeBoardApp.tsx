@@ -1,7 +1,12 @@
 "use client";
 
-import { startTransition, useMemo, useRef, useState } from "react";
-import type { Attachment, Board, BoardWithCards, Card, CardStatus } from "@/lib/types";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
+import type {
+  Board,
+  BoardWithCards,
+  CardStatus,
+  CardWithAttachments,
+} from "@/lib/types";
 import { reorderIndex } from "@/lib/board";
 import { reorderCard, updateCardStatus } from "@/lib/card-actions";
 import BoardList from "./BoardList";
@@ -13,10 +18,15 @@ import CardDetailModal from "./CardDetailModal";
 import DeleteCardModal from "./DeleteCardModal";
 import SessionMenu from "@/components/auth/SessionMenu";
 
-type PathCard = Card & { attachments: Attachment[] };
-
 /** How long to wait after the last drag move before writing the new order_index. */
 const REORDER_DEBOUNCE_MS = 300;
+
+/** Clicking a timeline node advances the card: next up → in progress → done → next up. */
+const STATUS_CYCLE: Record<CardStatus, CardStatus> = {
+  todo: "in_progress",
+  in_progress: "done",
+  done: "todo",
+};
 
 /**
  * Top-level client shell for the Flow board view. Board and card mutations
@@ -33,10 +43,30 @@ export default function KnowledgeBoardApp({
   const [activeId, setActiveId] = useState(initialBoards[0]?.id ?? "");
   const [modalBoard, setModalBoard] = useState<Board | "new" | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Board | null>(null);
-  const [cardModal, setCardModal] = useState<PathCard | "new" | null>(null);
-  const [cardDetail, setCardDetail] = useState<PathCard | null>(null);
-  const [cardDeleteTarget, setCardDeleteTarget] = useState<PathCard | null>(null);
-  const reorderTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [cardModal, setCardModal] = useState<CardWithAttachments | "new" | null>(null);
+  const [cardDetail, setCardDetail] = useState<CardWithAttachments | null>(null);
+  const [cardDeleteTarget, setCardDeleteTarget] = useState<CardWithAttachments | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  // Error from a background write (reorder / status toggle) — those have no
+  // form to report into, so they surface here as a dismissible banner.
+  const [saveError, setSaveError] = useState<string | null>(null);
+  // Debounced order_index writes, keyed per card so dragging one card never
+  // cancels another card's still-pending write.
+  const pendingReorders = useRef(
+    new Map<string, { timeout: ReturnType<typeof setTimeout>; orderIndex: number }>()
+  );
+
+  // Flush any still-debounced reorder writes if the component unmounts.
+  useEffect(() => {
+    const pending = pendingReorders.current;
+    return () => {
+      for (const [id, entry] of pending) {
+        clearTimeout(entry.timeout);
+        reorderCard(id, entry.orderIndex);
+      }
+      pending.clear();
+    };
+  }, []);
 
   // Re-sync when the server refetches boards after a create/edit/delete
   // (adjusting state during render, per https://react.dev/learn/you-might-not-need-an-effect).
@@ -59,58 +89,106 @@ export default function KnowledgeBoardApp({
     [boards, activeId]
   );
 
-  function updateActiveCards(next: PathCard[]) {
+  function updateActiveCards(next: CardWithAttachments[]) {
     if (!activeBoard) return;
     setBoards((prev) =>
       prev.map((b) => (b.id === activeBoard.id ? { ...b, cards: next } : b))
     );
   }
 
-  function handleReorder(next: PathCard[], movedId: string, movedIndex: number) {
+  function handleReorder(next: CardWithAttachments[], movedId: string, movedIndex: number) {
     const orderIndex = reorderIndex(next, movedIndex);
     updateActiveCards(
       next.map((c) => (c.id === movedId ? { ...c, order_index: orderIndex } : c))
     );
 
-    if (reorderTimeout.current) clearTimeout(reorderTimeout.current);
-    reorderTimeout.current = setTimeout(() => {
-      startTransition(() => {
-        reorderCard(movedId, orderIndex);
+    const existing = pendingReorders.current.get(movedId);
+    if (existing) clearTimeout(existing.timeout);
+    const timeout = setTimeout(() => {
+      pendingReorders.current.delete(movedId);
+      startTransition(async () => {
+        const result = await reorderCard(movedId, orderIndex);
+        setSaveError(result?.error ?? null);
       });
     }, REORDER_DEBOUNCE_MS);
+    pendingReorders.current.set(movedId, { timeout, orderIndex });
   }
 
-  function handleToggleDone(id: string) {
+  function handleCycleStatus(id: string) {
     if (!activeBoard) return;
     let nextStatus: CardStatus = "todo";
     updateActiveCards(
       activeBoard.cards.map((c) => {
         if (c.id !== id) return c;
-        nextStatus = c.status === "done" ? "todo" : "done";
+        nextStatus = STATUS_CYCLE[c.status];
         return { ...c, status: nextStatus };
       })
     );
-    startTransition(() => {
-      updateCardStatus(id, nextStatus);
+    startTransition(async () => {
+      const result = await updateCardStatus(id, nextStatus);
+      setSaveError(result?.error ?? null);
     });
   }
 
   return (
     <div className="flow">
       <div className="surface">
-        <div className="top">
+        <nav className="top">
           <div className="brand">
             <span className="m" /> Trailmark
           </div>
-          <button className="btn" onClick={() => setModalBoard("new")}>
-            + New board
+          <button
+            className="btn nav-new"
+            aria-label="New board"
+            title="New board"
+            onClick={() => setModalBoard("new")}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
           </button>
-          {userEmail ? (
-            <SessionMenu email={userEmail} />
-          ) : (
-            <button className="av" aria-label="Account" />
-          )}
-        </div>
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-label="Menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          <div className={menuOpen ? "top-actions open" : "top-actions"}>
+            {userEmail ? (
+              <SessionMenu email={userEmail} />
+            ) : (
+              <button className="av" aria-label="Account" />
+            )}
+          </div>
+        </nav>
+
+        {saveError && (
+          <div className="save-error" role="alert">
+            <span>{saveError}</span>
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Dismiss error"
+              onClick={() => setSaveError(null)}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {activeBoard ? (
           <div className="cols">
@@ -127,7 +205,7 @@ export default function KnowledgeBoardApp({
               title={activeBoard.name}
               cards={activeBoard.cards}
               onReorder={handleReorder}
-              onToggleDone={handleToggleDone}
+              onCycleStatus={handleCycleStatus}
               onAddStep={() => setCardModal("new")}
               onOpenDetail={setCardDetail}
               onEditCard={setCardModal}

@@ -37,12 +37,27 @@ export function reorderIndex(
   return 1;
 }
 
+/**
+ * Common second-level labels that pair with a 2-letter ccTLD to form a
+ * two-part public suffix (co.uk, com.au, ac.jp, …), so the chip shows the
+ * brand label ("example"), not the suffix ("co").
+ */
+const SECOND_LEVEL_SUFFIXES = new Set(["co", "com", "net", "org", "gov", "edu", "ac"]);
+
 /** A short attachment/link chip label, e.g. "🔗 mdn" or "📎 notes.md". */
 export function linkLabel(url: string): string {
   try {
     const host = new URL(url).hostname.replace(/^www\./, "");
-    const short = host.split(".").slice(-2, -1)[0] ?? host;
-    return `🔗 ${short}`;
+    const parts = host.split(".");
+    let index = parts.length - 2; // default: the label left of the TLD
+    if (
+      parts.length >= 3 &&
+      parts[parts.length - 1].length === 2 &&
+      SECOND_LEVEL_SUFFIXES.has(parts[parts.length - 2])
+    ) {
+      index = parts.length - 3;
+    }
+    return `🔗 ${parts[Math.max(index, 0)]}`;
   } catch {
     return "🔗 link";
   }

@@ -1,12 +1,14 @@
 "use client";
 
-import type { Attachment, Card } from "@/lib/types";
+import { useEffect, useState } from "react";
+import type { CardWithAttachments } from "@/lib/types";
 import { linkLabel, statusPill } from "@/lib/board";
+import { getAttachmentUrls } from "@/lib/attachment-actions";
 import AttachmentItem from "./AttachmentItem";
 import AttachmentUploader from "./AttachmentUploader";
 
 type CardDetailModalProps = {
-  card: Card & { attachments: Attachment[] };
+  card: CardWithAttachments;
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -15,6 +17,23 @@ type CardDetailModalProps = {
 /** Full card detail view: description, clickable URL, attachments, edit/delete. */
 export default function CardDetailModal({ card, onClose, onEdit, onDelete }: CardDetailModalProps) {
   const pill = statusPill(card.status);
+  const [urls, setUrls] = useState<Record<string, string | null>>({});
+  // One signed-URL fetch for all attachments; keyed on the paths (not the
+  // array identity) so board refetches don't re-sign unchanged attachments.
+  const pathsKey = card.attachments.map((a) => a.file_path).join("\n");
+
+  useEffect(() => {
+    // No attachments → nothing reads the map, so leftover entries are harmless.
+    const paths = pathsKey ? pathsKey.split("\n") : [];
+    if (paths.length === 0) return;
+    let cancelled = false;
+    getAttachmentUrls(paths).then((next) => {
+      if (!cancelled) setUrls(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [pathsKey]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -37,7 +56,7 @@ export default function CardDetailModal({ card, onClose, onEdit, onDelete }: Car
           {card.attachments.length > 0 && (
             <div className="attachment-list">
               {card.attachments.map((a) => (
-                <AttachmentItem key={a.id} attachment={a} />
+                <AttachmentItem key={a.id} attachment={a} url={urls[a.file_path] ?? null} />
               ))}
             </div>
           )}

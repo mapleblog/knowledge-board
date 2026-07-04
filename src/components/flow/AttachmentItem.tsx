@@ -1,31 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useActionState } from "react";
 import type { Attachment } from "@/lib/types";
-import { deleteAttachment, getAttachmentUrl } from "@/lib/attachment-actions";
+import { deleteAttachment } from "@/lib/attachment-actions";
 
 type AttachmentItemProps = {
   attachment: Attachment;
+  /** Signed URL for preview/download, fetched in one batch by the card detail modal. */
+  url: string | null;
 };
 
 /** One attachment row: image preview (if applicable), download link, delete. */
-export default function AttachmentItem({ attachment }: AttachmentItemProps) {
-  const [url, setUrl] = useState<string | null>(null);
+export default function AttachmentItem({ attachment, url }: AttachmentItemProps) {
+  const [deleteState, deleteAction, deleting] = useActionState(deleteAttachment, null);
   const isImage = attachment.mime_type.startsWith("image/");
-
-  useEffect(() => {
-    let cancelled = false;
-    getAttachmentUrl(attachment.file_path).then((signedUrl) => {
-      if (!cancelled) setUrl(signedUrl);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [attachment.file_path]);
-
-  async function handleDelete(formData: FormData) {
-    await deleteAttachment(formData);
-  }
 
   return (
     <div className="attachment-item">
@@ -44,13 +32,19 @@ export default function AttachmentItem({ attachment }: AttachmentItemProps) {
           )}
         </span>
       )}
-      <form action={handleDelete}>
+      <form action={deleteAction}>
         <input type="hidden" name="id" value={attachment.id} />
         <input type="hidden" name="file_path" value={attachment.file_path} />
-        <button type="submit" className="icon-btn" aria-label={`Delete ${attachment.file_name}`}>
+        <button
+          type="submit"
+          className="icon-btn"
+          aria-label={`Delete ${attachment.file_name}`}
+          disabled={deleting}
+        >
           🗑
         </button>
       </form>
+      {deleteState?.error && <p className="auth-error">{deleteState.error}</p>}
     </div>
   );
 }
