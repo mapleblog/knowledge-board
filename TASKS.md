@@ -83,7 +83,15 @@ The core "learning path" loop, persisted.
 - [x] Fix: mobile top bar (brand / "+ New board" / session menu) crowded and overlapped below 520px — the earlier two-row wrap still overflowed row 2 on narrow phones, so the top bar is now a navbar: on ≤520px the actions collapse into a hamburger-toggled dropdown; desktop layout unchanged (`KnowledgeBoardApp.tsx`, `src/app/globals.css`)
 - [x] Fix: hydration mismatch from `@dnd-kit`'s auto-generated `aria-describedby` instance ids not matching between SSR and client — pinned via explicit `DndContext` `id={`path-${boardId}`}` (`TimelinePath.tsx`, `KnowledgeBoardApp.tsx`)
 - [x] Fix: drag handle too narrow — reordering required grabbing the small ⋮⋮ grip. The whole card is now the drag handle (5px pointer activation keeps clicks working, click-after-drag guard keeps the detail modal from opening on drop, `touch-action: manipulation` keeps touch scrolling working); grip is decorative (`StepCard.tsx`, `globals.css`)
-- [ ] Loading / error / empty states across boards and cards
+- [x] Loading / error / empty states across boards and cards — added a route
+  `loading.tsx` skeleton (two-column shell, shimmer, respects
+  `prefers-reduced-motion`) shown while `page.tsx` fetches; a route `error.tsx`
+  boundary (Next 16.2 `unstable_retry`) so a failed boards fetch offers a retry
+  instead of masquerading as the empty state; `page.tsx` now throws on the
+  Supabase fetch error instead of swallowing it; and a card-level empty state
+  (`.path-empty`) for a board with zero steps. Board-level empty state (Phase 2)
+  and mutation error/pending states (delete modals, reorder/status banner,
+  modal "Saving…") already existed
 - [ ] Accessibility pass (keyboard drag, focus traps in modals, labels)
 - [ ] New-user path: create board + first card in under 2 minutes, no tutorial
 

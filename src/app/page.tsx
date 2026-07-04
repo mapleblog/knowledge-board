@@ -14,11 +14,17 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: boards } = await supabase
+  const { data: boards, error } = await supabase
     .from("boards")
     .select("*, cards(*, attachments(*))")
     .order("created_at", { ascending: true })
     .order("order_index", { referencedTable: "cards", ascending: true });
+
+  // A failed fetch must not look like "you have no boards" — throw so the
+  // route's error boundary (error.tsx) shows a retry instead of the empty state.
+  if (error) {
+    throw new Error(`Failed to load boards: ${error.message}`);
+  }
 
   // The DB stores color/status as text (checked by constraints); narrow them
   // to the domain unions here so the rest of the app gets real types.

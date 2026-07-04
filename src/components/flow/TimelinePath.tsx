@@ -96,6 +96,13 @@ export default function TimelinePath({
         </SortableContext>
       </DndContext>
 
+      {cards.length === 0 && (
+        <p className="path-empty">
+          This path has no steps yet. Add your first one below to start building
+          it.
+        </p>
+      )}
+
       <button className="add-step" onClick={onAddStep}>
         + Add a step to your path
       </button>
