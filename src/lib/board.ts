@@ -4,8 +4,10 @@ import type { Card, CardStatus } from "./types";
 export function boardProgress(cards: Pick<Card, "status">[]) {
   const total = cards.length;
   const done = cards.filter((c) => c.status === "done").length;
+  const inProgress = cards.filter((c) => c.status === "in_progress").length;
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
-  return { done, total, pct };
+  const inProgressPct = total === 0 ? 0 : Math.round((inProgress / total) * 100);
+  return { done, total, pct, inProgress, inProgressPct };
 }
 
 /** Short chip label + whether it should use the accent style, per card status. */

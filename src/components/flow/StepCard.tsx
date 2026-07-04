@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { CardWithAttachments } from "@/lib/types";
+import type { Attachment, CardWithAttachments } from "@/lib/types";
 import { linkLabel, statusPill } from "@/lib/board";
+import { getAttachmentUrls } from "@/lib/attachment-actions";
 
 type StepCardProps = {
   card: CardWithAttachments;
@@ -30,6 +31,35 @@ export default function StepCard({
 }: StepCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: card.id });
+
+  // Attachments are private; fetch a signed URL on click and open it. The blank
+  // tab is opened synchronously so the pop-up isn't blocked, then pointed at the
+  // URL once it resolves.
+  const [openingId, setOpeningId] = useState<string | null>(null);
+  async function openAttachment(
+    e: React.MouseEvent,
+    attachment: Attachment
+  ) {
+    e.stopPropagation();
+    const tab = window.open("about:blank", "_blank");
+    if (tab) tab.opener = null;
+    setOpeningId(attachment.id);
+    try {
+      const urls = await getAttachmentUrls([attachment.file_path]);
+      const url = urls[attachment.file_path];
+      if (url && tab) {
+        tab.location.href = url;
+      } else if (url) {
+        window.location.href = url;
+      } else {
+        tab?.close();
+      }
+    } catch {
+      tab?.close();
+    } finally {
+      setOpeningId(null);
+    }
+  }
 
   // A drag ends with the pointer still over the card, which fires a click;
   // remember the drag so that click doesn't open the detail view.
@@ -109,12 +139,32 @@ export default function StepCard({
         </div>
         {card.description ? <p>{card.description}</p> : null}
         <div className="foot">
-          <span className={`mini${pill.accent ? " accent" : ""}`}>{pill.label}</span>
-          {card.url ? <span className="mini">{linkLabel(card.url)}</span> : null}
+          <span className={`mini status-${card.status.replace("_", "-")}`}>
+            {pill.label}
+          </span>
+          {card.url ? (
+            <a
+              className="mini mini-action"
+              href={card.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              {linkLabel(card.url)}
+            </a>
+          ) : null}
           {card.attachments.map((a) => (
-            <span className="mini" key={a.id}>
-              📎 {a.file_name}
-            </span>
+            <button
+              type="button"
+              className="mini mini-action"
+              key={a.id}
+              onClick={(e) => openAttachment(e, a)}
+              onPointerDown={(e) => e.stopPropagation()}
+              disabled={openingId === a.id}
+            >
+              📎 {openingId === a.id ? "Opening…" : a.file_name}
+            </button>
           ))}
         </div>
       </div>

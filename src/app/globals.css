@@ -284,15 +284,18 @@ body {
   color: var(--muted);
 }
 .flow .progress {
+  display: flex;
+  justify-content: flex-end;
   height: 5px;
   border-radius: 5px;
   background: #eef0f5;
   overflow: hidden;
 }
 .flow .progress i {
-  display: block;
   height: 100%;
-  border-radius: 5px;
+}
+.flow .progress i.in-progress {
+  background: #f59e0b;
 }
 
 .flow .new-board {
@@ -445,6 +448,40 @@ body {
 .flow .mini.accent {
   background: #eef0ff;
   color: var(--accent);
+}
+/* Status pills — one color per card status */
+.flow .status-todo {
+  background: #eef1f7;
+  color: #64748b;
+}
+.flow .status-in-progress {
+  background: #fff3e0;
+  color: #b45309;
+}
+.flow .status-done {
+  background: #e6f7ee;
+  color: #15803d;
+}
+.flow .mini-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  font-family: var(--font);
+  background: #eef0ff;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.flow .mini-action:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.flow .mini-action:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .flow .add-step {

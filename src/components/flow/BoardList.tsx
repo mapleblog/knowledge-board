@@ -30,7 +30,7 @@ export default function BoardList({
         </button>
 
         {boards.map((board) => {
-          const { done, total, pct } = boardProgress(board.cards);
+          const { done, total, pct, inProgressPct } = boardProgress(board.cards);
           return (
             <div
               key={board.id}
@@ -46,6 +46,12 @@ export default function BoardList({
                     {done} of {total} done
                   </p>
                   <div className="progress">
+                    {inProgressPct > 0 && (
+                      <i
+                        className="in-progress"
+                        style={{ width: `${inProgressPct}%` }}
+                      />
+                    )}
                     <i style={{ width: `${pct}%`, background: board.color }} />
                   </div>
                 </div>
