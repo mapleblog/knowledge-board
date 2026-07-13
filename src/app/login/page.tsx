@@ -15,7 +15,7 @@ export default async function LoginPage({
   const errorMessage = error ? ERROR_MESSAGES[error] : undefined;
 
   return (
-    <div className="flow">
+    <div className="surface">
       <div className="auth-panel">
         <div className="brand">
           <span className="m" />

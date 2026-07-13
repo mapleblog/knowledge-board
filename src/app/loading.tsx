@@ -5,9 +5,8 @@
  */
 export default function Loading() {
   return (
-    <div className="flow" aria-busy="true" aria-live="polite">
-      <div className="surface">
-        <nav className="top">
+    <div className="surface" aria-busy="true" aria-live="polite">
+      <nav className="top">
           <div className="brand">
             <span className="m" /> Trailmark
           </div>
@@ -33,6 +32,5 @@ export default function Loading() {
 
         <span className="sr-only">Loading your boards…</span>
       </div>
-    </div>
   );
 }

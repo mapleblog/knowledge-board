@@ -19,9 +19,8 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flow">
-      <div className="surface">
-        <div className="empty-state" role="alert">
+    <div className="surface">
+      <div className="empty-state" role="alert">
           <h2>Something went wrong</h2>
           <p className="tag">
             We couldn’t load your boards. This is usually temporary — please try
@@ -30,7 +29,6 @@ export default function Error({
           <button className="btn" onClick={() => unstable_retry()}>
             Try again
           </button>
-        </div>
       </div>
     </div>
   );

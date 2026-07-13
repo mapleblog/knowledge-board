@@ -3,7 +3,7 @@
 /* ============================================================
    Knowledge Board — "Flow" design system
    Ported from docs/mockup.html + docs/DESIGN.md
-   Tokens live on the .flow scope so the surface can render a
+   Tokens live on the .surface scope so the surface can render a
    light theme regardless of the app chrome around it.
    ============================================================ */
 
@@ -26,8 +26,8 @@ body {
   min-height: 100vh;
 }
 
-/* ---- Flow theme scope ---- */
-.flow {
+/* ---- Surface theme scope (primary full-screen container) ---- */
+.surface {
   --bg: #f7f8fb;
   --panel: #ffffff;
   --ink: #1a1d26;
@@ -36,22 +36,15 @@ body {
   --accent: #4f46e5;
   font-family: var(--font);
   width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 32px 20px;
-}
-
-.flow .surface {
+  min-height: 100vh;
+  margin: 0;
+  padding: 32px 28px;
   background: var(--bg);
   color: var(--ink);
-  border-radius: 20px;
-  padding: 26px 28px;
-  box-shadow: 0 30px 60px -40px rgba(20, 24, 60, 0.5),
-    inset 0 0 0 1px #eef0f5;
 }
 
 /* ---- Top bar / navbar ---- */
-.flow .top {
+.surface .top {
   position: relative;
   display: flex;
   align-items: center;
@@ -59,17 +52,17 @@ body {
   margin-bottom: 24px;
 }
 /* Brand sits at the left; the actions below are pushed to the right edge */
-.flow .nav-toggle,
-.flow .top-actions {
+.surface .nav-toggle,
+.surface .top-actions {
   margin-left: auto;
 }
-.flow .top-actions {
+.surface .top-actions {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 /* Hamburger toggle — hidden on desktop, shown on the mobile navbar */
-.flow .nav-toggle {
+.surface .nav-toggle {
   display: none;
   flex-direction: column;
   justify-content: center;
@@ -82,18 +75,18 @@ body {
   background: #fff;
   cursor: pointer;
 }
-.flow .nav-toggle span {
+.surface .nav-toggle span {
   display: block;
   height: 2px;
   border-radius: 2px;
   background: var(--ink);
 }
 @media (max-width: 520px) {
-  .flow .nav-toggle {
+  .surface .nav-toggle {
     display: flex;
   }
   /* Collapse the remaining actions into a dropdown anchored to the navbar */
-  .flow .top-actions {
+  .surface .top-actions {
     display: none;
     position: absolute;
     top: calc(100% + 8px);
@@ -108,41 +101,41 @@ body {
     border-radius: 12px;
     box-shadow: 0 20px 40px -20px rgba(20, 24, 60, 0.4);
   }
-  .flow .top-actions.open {
+  .surface .top-actions.open {
     display: flex;
   }
-  .flow .top-actions .session-menu {
+  .surface .top-actions .session-menu {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
     margin-left: 0;
   }
-  .flow .top-actions .session-email {
+  .surface .top-actions .session-email {
     max-width: none;
   }
 }
-.flow .brand {
+.surface .brand {
   display: flex;
   align-items: center;
   gap: 10px;
   font-weight: 700;
   font-size: 17px;
 }
-.flow .brand .m {
+.surface .brand .m {
   position: relative;
   width: 24px;
   height: 24px;
   border-radius: 8px;
   background: var(--accent);
 }
-.flow .brand .m::after {
+.surface .brand .m::after {
   content: "";
   position: absolute;
   inset: 7px;
   border: 2px solid #fff;
   border-radius: 3px;
 }
-.flow .btn {
+.surface .btn {
   margin-left: 14px;
   border: 0;
   cursor: pointer;
@@ -156,16 +149,16 @@ body {
   box-shadow: 0 8px 20px -8px rgba(79, 70, 229, 0.7);
   transition: 0.15s;
 }
-.flow .btn:hover {
+.surface .btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 24px -8px rgba(79, 70, 229, 0.75);
 }
-.flow .btn.ghost {
+.surface .btn.ghost {
   background: #eef0ff;
   color: var(--accent);
   box-shadow: none;
 }
-.flow .av {
+.surface .av {
   margin-left: auto;
   width: 32px;
   height: 32px;
@@ -176,18 +169,18 @@ body {
 }
 
 /* ---- Two-column body ---- */
-.flow .cols {
+.surface .cols {
   display: grid;
   grid-template-columns: 270px 1fr;
   gap: 24px;
 }
 @media (max-width: 900px) {
-  .flow .cols {
+  .surface .cols {
     grid-template-columns: 1fr;
   }
 }
 
-.flow .subhead {
+.surface .subhead {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1.3px;
@@ -196,14 +189,20 @@ body {
 }
 
 /* ---- Board list ---- */
-.flow .board-list {
+.surface .board-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-.flow .b-item {
-  background: var(--panel);
-  border: 1px solid var(--line);
+.surface .b-item {
+  /* Per-board accent supplied inline as --b-color; falls back to the panel. */
+  --b-color: var(--panel);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--b-color) 18%, #fff),
+    #fff 70%
+  );
+  border: 1px solid color-mix(in srgb, var(--b-color) 32%, var(--line));
   border-radius: 14px;
   padding: 14px;
   display: flex;
@@ -212,15 +211,15 @@ body {
   transition: 0.15s;
   position: relative;
 }
-.flow .b-item:hover {
+.surface .b-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px -16px rgba(20, 24, 60, 0.4);
+  box-shadow: 0 12px 24px -16px color-mix(in srgb, var(--b-color) 45%, rgba(20, 24, 60, 0.4));
 }
-.flow .b-item.on {
+.surface .b-item.on {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
 }
-.flow .b-item-main {
+.surface .b-item-main {
   display: flex;
   gap: 12px;
   flex: 1;
@@ -233,17 +232,17 @@ body {
   border: 0;
   padding: 0;
 }
-.flow .b-actions {
+.surface .b-actions {
   display: flex;
   gap: 2px;
   opacity: 0;
   transition: 0.15s;
 }
-.flow .b-item:hover .b-actions,
-.flow .b-item:focus-within .b-actions {
+.surface .b-item:hover .b-actions,
+.surface .b-item:focus-within .b-actions {
   opacity: 1;
 }
-.flow .icon-btn {
+.surface .icon-btn {
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -257,11 +256,11 @@ body {
   justify-content: center;
   transition: 0.15s;
 }
-.flow .icon-btn:hover {
+.surface .icon-btn:hover {
   background: #f0f1f7;
   color: var(--ink);
 }
-.flow .ring {
+.surface .ring {
   width: 38px;
   height: 38px;
   border-radius: 11px;
@@ -273,17 +272,17 @@ body {
   font-weight: 700;
   font-size: 15px;
 }
-.flow .b-item h4 {
+.surface .b-item h4 {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
 }
-.flow .b-item p {
+.surface .b-item p {
   margin: 3px 0 8px;
   font-size: 11px;
   color: var(--muted);
 }
-.flow .progress {
+.surface .progress {
   display: flex;
   justify-content: flex-end;
   height: 5px;
@@ -291,14 +290,14 @@ body {
   background: #eef0f5;
   overflow: hidden;
 }
-.flow .progress i {
+.surface .progress i {
   height: 100%;
 }
-.flow .progress i.in-progress {
+.surface .progress i.in-progress {
   background: #f59e0b;
 }
 
-.flow .new-board {
+.surface .new-board {
   border: 2px dashed var(--line);
   border-radius: 14px;
   padding: 13px;
@@ -311,38 +310,38 @@ body {
   font-family: var(--font);
   width: 100%;
 }
-.flow .new-board:hover {
+.surface .new-board:hover {
   border-color: #c9cee0;
   color: var(--ink);
 }
 
 /* ---- Timeline path ---- */
-.flow .path {
+.surface .path {
   position: relative;
   padding-left: 8px;
 }
-.flow .path-head {
+.surface .path-head {
   display: flex;
   align-items: baseline;
   gap: 12px;
   margin-bottom: 18px;
 }
-.flow .path-head h2 {
+.surface .path-head h2 {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
 }
-.flow .path-head .tag {
+.surface .path-head .tag {
   font-size: 12px;
   color: var(--muted);
 }
 
-.flow .step {
+.surface .step {
   position: relative;
   padding-left: 42px;
   padding-bottom: 14px;
 }
-.flow .step::before {
+.surface .step::before {
   content: "";
   position: absolute;
   left: 15px;
@@ -351,10 +350,10 @@ body {
   width: 2px;
   background: var(--line);
 }
-.flow .step:last-of-type::before {
+.surface .step:last-of-type::before {
   display: none;
 }
-.flow .step .node {
+.surface .step .node {
   position: absolute;
   left: 6px;
   top: 14px;
@@ -369,21 +368,21 @@ body {
   -webkit-appearance: none;
   z-index: 2;
 }
-.flow .step .node:focus-visible {
+.surface .step .node:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-.flow .step.in-progress .node::after {
+.surface .step.in-progress .node::after {
   content: "";
   position: absolute;
   inset: 3px;
   border-radius: 50%;
   background: var(--accent);
 }
-.flow .step.done .node {
+.surface .step.done .node {
   background: var(--accent);
 }
-.flow .step.done .node::after {
+.surface .step.done .node::after {
   content: "";
   position: absolute;
   inset: 4px;
@@ -391,7 +390,7 @@ body {
   box-shadow: inset 0 0 0 2px #fff;
 }
 
-.flow .card {
+.surface .card {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 13px;
@@ -402,67 +401,67 @@ body {
   touch-action: manipulation;
   transition: 0.12s;
 }
-.flow .card:hover {
+.surface .card:hover {
   box-shadow: 0 12px 26px -18px rgba(20, 24, 60, 0.5);
 }
-.flow .card.dragging {
+.surface .card.dragging {
   opacity: 0.55;
   transform: rotate(-1deg) scale(1.01);
 }
-.flow .card .r {
+.surface .card .r {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.flow .card .grip {
+.surface .card .grip {
   color: #c4c8d4;
   letter-spacing: -2px;
   font-size: 15px;
 }
-.flow .card h5 {
+.surface .card h5 {
   margin: 0;
   flex: 1;
   font-size: 14px;
   font-weight: 600;
 }
-.flow .card p {
+.surface .card p {
   margin: 5px 0 0;
   font-size: 12px;
   color: var(--muted);
   line-height: 1.5;
 }
-.flow .card .foot {
+.surface .card .foot {
   display: flex;
   gap: 8px;
   margin-top: 10px;
   flex-wrap: wrap;
 }
 
-.flow .mini {
+.surface .mini {
   font-size: 10px;
   padding: 3px 9px;
   border-radius: 20px;
   background: #f0f1f7;
   color: #6b7280;
 }
-.flow .mini.accent {
+.surface .mini.accent {
   background: #eef0ff;
   color: var(--accent);
 }
 /* Status pills — one color per card status */
-.flow .status-todo {
+.surface .status-todo {
   background: #eef1f7;
   color: #64748b;
 }
-.flow .status-in-progress {
+.surface .status-in-progress {
   background: #fff3e0;
   color: #b45309;
 }
-.flow .status-done {
+.surface .status-done {
   background: #e6f7ee;
   color: #15803d;
 }
-.flow .mini-action {
+.surface .mini-action {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -475,16 +474,16 @@ body {
   cursor: pointer;
   transition: 0.15s;
 }
-.flow .mini-action:hover {
+.surface .mini-action:hover {
   background: var(--accent);
   color: #fff;
 }
-.flow .mini-action:disabled {
+.surface .mini-action:disabled {
   opacity: 0.6;
   cursor: default;
 }
 
-.flow .add-step {
+.surface .add-step {
   margin-left: 42px;
   border: 2px dashed var(--line);
   border-radius: 13px;
@@ -498,13 +497,13 @@ body {
   font-family: var(--font);
   width: calc(100% - 42px);
 }
-.flow .add-step:hover {
+.surface .add-step:hover {
   border-color: #c9cee0;
   color: var(--ink);
 }
 
 /* drop indicator shown while dragging to reorder */
-.flow .drop-line {
+.surface .drop-line {
   height: 2px;
   background: var(--accent);
   border-radius: 2px;
@@ -513,7 +512,7 @@ body {
 }
 
 /* ---- Auth pages ---- */
-.flow .auth-panel {
+.surface .auth-panel {
   max-width: 360px;
   margin: 60px auto;
   background: var(--panel);
@@ -522,22 +521,22 @@ body {
   padding: 32px 28px;
   box-shadow: 0 30px 60px -40px rgba(20, 24, 60, 0.5);
 }
-.flow .auth-panel h1 {
+.surface .auth-panel h1 {
   margin: 18px 0 4px;
   font-size: 21px;
   font-weight: 700;
 }
-.flow .auth-panel .tag {
+.surface .auth-panel .tag {
   margin: 0 0 20px;
   font-size: 13px;
   color: var(--muted);
 }
-.flow .auth-form {
+.surface .auth-form {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
-.flow .field {
+.surface .field {
   display: flex;
   flex-direction: column;
   gap: 7px;
@@ -545,7 +544,7 @@ body {
   font-weight: 600;
   color: var(--muted);
 }
-.flow .field input {
+.surface .field input {
   font-family: var(--font);
   font-size: 14px;
   font-weight: 400;
@@ -556,22 +555,22 @@ body {
   background: #f2f3f8;
   transition: 0.15s;
 }
-.flow .field input:focus {
+.surface .field input:focus {
   outline: none;
   background: var(--panel);
   border-color: var(--accent);
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
 }
-.flow .auth-form .btn {
+.surface .auth-form .btn {
   margin-left: 0;
   margin-top: 4px;
 }
-.flow .auth-error {
+.surface .auth-error {
   margin: 0;
   font-size: 12px;
   color: #ef4444;
 }
-.flow .save-error {
+.surface .save-error {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -584,25 +583,25 @@ body {
   color: #ef4444;
   background: rgba(239, 68, 68, 0.08);
 }
-.flow .auth-message {
+.surface .auth-message {
   margin: 0;
   font-size: 12px;
   color: var(--accent);
 }
-.flow .auth-switch {
+.surface .auth-switch {
   margin: 18px 0 0;
   font-size: 13px;
   color: var(--muted);
   text-align: center;
 }
-.flow .auth-switch a {
+.surface .auth-switch a {
   color: var(--accent);
   font-weight: 600;
   text-decoration: none;
 }
 
 /* ---- Modals (new/edit board, delete confirm) ---- */
-.flow .modal-overlay {
+.surface .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(20, 22, 34, 0.5);
@@ -612,7 +611,7 @@ body {
   padding: 20px;
   z-index: 50;
 }
-.flow .modal {
+.surface .modal {
   background: var(--panel);
   border-radius: 18px;
   padding: 26px 26px 22px;
@@ -620,12 +619,12 @@ body {
   max-width: 380px;
   box-shadow: 0 30px 60px -30px rgba(20, 24, 60, 0.6);
 }
-.flow .modal h2 {
+.surface .modal h2 {
   margin: 0 0 14px;
   font-size: 18px;
   font-weight: 700;
 }
-.flow .field textarea {
+.surface .field textarea {
   font-family: var(--font);
   font-size: 14px;
   font-weight: 400;
@@ -638,13 +637,130 @@ body {
   min-height: 76px;
   transition: 0.15s;
 }
-.flow .field textarea:focus {
+.surface .field textarea:focus {
   outline: none;
   background: var(--panel);
   border-color: var(--accent);
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
 }
-.flow .color-field {
+/* ---- Board modal: floating-label fields ---- */
+/* Scoped to .board-form so the shared login/signup .field styling is untouched.
+   The <span> label sits over the input and floats up into the outlined border
+   on focus or when the field has content (via the :placeholder-shown trick). */
+.surface .board-form .field {
+  position: relative;
+  gap: 0;
+}
+.surface .board-form .field input,
+.surface .board-form .field textarea {
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+.surface .board-form .field > span {
+  position: absolute;
+  left: 10px;
+  top: 13px;
+  padding: 0 5px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+  background: var(--panel);
+  border-radius: 4px;
+  pointer-events: none;
+  transition: 0.15s ease;
+}
+.surface .board-form .field input:focus + span,
+.surface .board-form .field input:not(:placeholder-shown) + span,
+.surface .board-form .field textarea:focus + span,
+.surface .board-form .field textarea:not(:placeholder-shown) + span {
+  top: -8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.surface .board-form .field input:focus + span,
+.surface .board-form .field textarea:focus + span {
+  color: var(--accent);
+}
+
+/* ---- Board modal: two-pane (accent rail + fields) layout ---- */
+.surface .modal.board-modal-split {
+  display: flex;
+  padding: 0;
+  max-width: 560px;
+  overflow: hidden; /* clip the colored rail to the rounded corners */
+}
+.surface .split-rail {
+  flex: 0 0 168px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 28px 20px;
+  text-align: center;
+  background: linear-gradient(
+    155deg,
+    var(--rail),
+    color-mix(in srgb, var(--rail) 60%, #14162a)
+  );
+}
+.surface .rail-ring {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.55);
+}
+.surface .rail-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #fff;
+  word-break: break-word;
+}
+.surface .rail-name.is-placeholder {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+.surface .split-body {
+  flex: 1;
+  min-width: 0;
+  padding: 26px 26px 22px;
+}
+.surface .split-body h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 700;
+}
+/* Stack the rail on top on narrow screens */
+@media (max-width: 520px) {
+  .surface .modal.board-modal-split {
+    flex-direction: column;
+    max-width: 400px;
+  }
+  .surface .split-rail {
+    flex: 0 0 auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 18px 22px;
+    text-align: left;
+  }
+  .surface .rail-ring {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    font-size: 20px;
+  }
+}
+
+.surface .color-field {
   border: 0;
   padding: 0;
   margin: 0;
@@ -652,17 +768,17 @@ body {
   flex-direction: column;
   gap: 8px;
 }
-.flow .color-field legend {
+.surface .color-field legend {
   padding: 0;
   font-size: 12px;
   font-weight: 600;
   color: var(--muted);
 }
-.flow .color-swatches {
+.surface .color-swatches {
   display: flex;
   gap: 10px;
 }
-.flow .swatch {
+.surface .swatch {
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -672,7 +788,7 @@ body {
   cursor: pointer;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6);
 }
-.flow .swatch input {
+.surface .swatch input {
   appearance: none;
   width: 100%;
   height: 100%;
@@ -680,15 +796,15 @@ body {
   border-radius: 50%;
   cursor: pointer;
 }
-.flow .swatch:has(input:checked) {
+.surface .swatch:has(input:checked) {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
-.flow .swatch:has(input:focus-visible) {
+.surface .swatch:has(input:focus-visible) {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-.flow .modal-actions {
+.surface .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
@@ -696,10 +812,10 @@ body {
   padding-top: 16px;
   border-top: 1px solid var(--line);
 }
-.flow .modal-actions .btn {
+.surface .modal-actions .btn {
   margin-left: 0;
 }
-.flow .btn-danger {
+.surface .btn-danger {
   border: 0;
   cursor: pointer;
   background: #ef4444;
@@ -711,21 +827,21 @@ body {
   font-family: var(--font);
   transition: 0.15s;
 }
-.flow .btn-danger:hover {
+.surface .btn-danger:hover {
   transform: translateY(-1px);
 }
 
 /* ---- Attachments (card detail view) ---- */
-.flow .attachments {
+.surface .attachments {
   margin: 14px 0;
 }
-.flow .attachment-list {
+.surface .attachment-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin: 8px 0;
 }
-.flow .attachment-item {
+.surface .attachment-item {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -734,38 +850,38 @@ body {
   border-radius: 10px;
   padding: 4px 6px;
 }
-.flow .attachment-thumb {
+.surface .attachment-thumb {
   width: 40px;
   height: 40px;
   object-fit: cover;
   border-radius: 6px;
   display: block;
 }
-.flow .attach-upload {
+.surface .attach-upload {
   margin-top: 4px;
 }
 
 /* ---- Empty state ---- */
-.flow .empty-state {
+.surface .empty-state {
   text-align: center;
   padding: 64px 20px;
 }
-.flow .empty-state h2 {
+.surface .empty-state h2 {
   margin: 0 0 8px;
   font-size: 20px;
   font-weight: 700;
 }
-.flow .empty-state .tag {
+.surface .empty-state .tag {
   margin: 0 0 20px;
   color: var(--muted);
   font-size: 13px;
 }
-.flow .empty-state .btn {
+.surface .empty-state .btn {
   margin-left: 0;
 }
 
 /* Card-level empty state (a board with no steps yet) */
-.flow .path-empty {
+.surface .path-empty {
   margin: 0 0 14px 42px;
   padding: 14px 16px;
   border-radius: 13px;
@@ -777,12 +893,12 @@ body {
 }
 
 /* ---- Loading skeleton ---- */
-.flow .skel-boards {
+.surface .skel-boards {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-.flow .skel {
+.surface .skel {
   display: block;
   border-radius: 10px;
   background: linear-gradient(
@@ -794,14 +910,14 @@ body {
   background-size: 200% 100%;
   animation: skel-shimmer 1.3s ease-in-out infinite;
 }
-.flow .skel-line {
+.surface .skel-line {
   height: 14px;
 }
-.flow .skel-board {
+.surface .skel-board {
   height: 58px;
   border-radius: 14px;
 }
-.flow .skel-card {
+.surface .skel-card {
   height: 74px;
   margin: 0 0 14px 42px;
   border-radius: 13px;
@@ -815,13 +931,13 @@ body {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .flow .skel {
+  .surface .skel {
     animation: none;
   }
 }
 
 /* Visually-hidden text for screen readers */
-.flow .sr-only {
+.surface .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -834,13 +950,13 @@ body {
 }
 
 /* ---- Session menu (top-bar logout) ---- */
-.flow .session-menu {
+.surface .session-menu {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.flow .session-email {
+.surface .session-email {
   font-size: 12px;
   color: var(--muted);
   max-width: 140px;
@@ -849,12 +965,12 @@ body {
   white-space: nowrap;
 }
 @media (max-width: 520px) {
-  .flow .session-email {
+  .surface .session-email {
     max-width: 90px;
   }
 }
 
-.flow .thumb {
+.surface .thumb {
   width: 52px;
   height: 52px;
   border-radius: 10px;

@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import type { Board, BoardWithCards } from "@/lib/types";
 import { boardProgress } from "@/lib/board";
 
@@ -35,6 +36,7 @@ export default function BoardList({
             <div
               key={board.id}
               className={`b-item${board.id === activeId ? " on" : ""}`}
+              style={{ "--b-color": board.color } as CSSProperties}
             >
               <button type="button" className="b-item-main" onClick={() => onSelect(board.id)}>
                 <span className="ring" style={{ background: board.color }}>

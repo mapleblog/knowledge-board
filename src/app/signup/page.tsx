@@ -8,7 +8,7 @@ export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signUp, null);
 
   return (
-    <div className="flow">
+    <div className="surface">
       <div className="auth-panel">
         <div className="brand">
           <span className="m" />

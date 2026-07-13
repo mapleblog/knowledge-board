@@ -6,6 +6,8 @@ type ModalProps = {
   onClose: () => void;
   /** id of the heading that names the dialog (for aria-labelledby). */
   labelledBy: string;
+  /** Extra class on the dialog box, for per-modal layout variants. */
+  className?: string;
   children: ReactNode;
 };
 
@@ -20,7 +22,7 @@ const FOCUSABLE =
  * trap so Tab can't leave the dialog, and restoring focus to the triggering
  * element on close. Render the dialog's own heading/body/actions as children.
  */
-export default function Modal({ onClose, labelledBy, children }: ModalProps) {
+export default function Modal({ onClose, labelledBy, className, children }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   // Keep the latest onClose without making it an effect dependency — the setup
   // (focus capture, listener) must run once on mount, not on every parent
@@ -82,7 +84,7 @@ export default function Modal({ onClose, labelledBy, children }: ModalProps) {
     <div className="modal-overlay" onClick={onClose}>
       <div
         ref={dialogRef}
-        className="modal"
+        className={className ? `modal ${className}` : "modal"}
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}

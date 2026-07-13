@@ -131,9 +131,8 @@ export default function KnowledgeBoardApp({
   }
 
   return (
-    <div className="flow">
-      <div className="surface">
-        <nav className="top">
+    <div className="surface">
+      <nav className="top">
           <div className="brand">
             <span className="m" /> Trailmark
           </div>
@@ -204,7 +203,6 @@ export default function KnowledgeBoardApp({
             </button>
           </div>
         )}
-      </div>
 
       {modalBoard && (
         <BoardModal

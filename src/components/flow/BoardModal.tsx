@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useId, useRef } from "react";
+import { useActionState, useEffect, useId, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { BOARD_COLORS, type Board } from "@/lib/types";
 import { createBoard, updateBoard } from "@/lib/board-actions";
 import Modal from "./Modal";
@@ -20,6 +21,12 @@ export default function BoardModal({ board, onClose }: BoardModalProps) {
   const wasPending = useRef(false);
   const titleId = useId();
 
+  // Track name + color so the left rail previews the board as it's built.
+  const [name, setName] = useState(board?.name ?? "");
+  const [color, setColor] = useState(board?.color ?? BOARD_COLORS[0]);
+  const trimmed = name.trim();
+  const initial = trimmed.charAt(0).toUpperCase();
+
   useEffect(() => {
     if (wasPending.current && !pending && !state?.error) {
       onClose();
@@ -28,36 +35,51 @@ export default function BoardModal({ board, onClose }: BoardModalProps) {
   }, [pending, state, onClose]);
 
   return (
-    <Modal onClose={onClose} labelledBy={titleId}>
-      <h2 id={titleId}>{board ? "Edit board" : "New board"}</h2>
-        <form action={formAction} className="auth-form">
+    <Modal onClose={onClose} labelledBy={titleId} className="board-modal-split">
+      <aside className="split-rail" style={{ "--rail": color } as CSSProperties}>
+        <span className="rail-ring">{initial}</span>
+        <span className={`rail-name${trimmed ? "" : " is-placeholder"}`}>
+          {trimmed || "Your board"}
+        </span>
+      </aside>
+      <div className="split-body">
+        <h2 id={titleId}>{board ? "Edit board" : "New board"}</h2>
+        <form action={formAction} className="auth-form board-form">
           {board && <input type="hidden" name="id" value={board.id} />}
           <label className="field">
-            <span>Name</span>
             <input
               type="text"
               name="name"
               required
               maxLength={120}
               autoFocus
-              defaultValue={board?.name}
+              placeholder=" "
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
+            <span>Name</span>
           </label>
           <label className="field">
+            <textarea
+              name="description"
+              rows={3}
+              placeholder=" "
+              defaultValue={board?.description ?? ""}
+            />
             <span>Description (optional)</span>
-            <textarea name="description" rows={3} defaultValue={board?.description ?? ""} />
           </label>
           <fieldset className="color-field">
             <legend>Accent color</legend>
             <div className="color-swatches">
-              {BOARD_COLORS.map((color, i) => (
-                <label key={color} className="swatch" style={{ background: color }}>
+              {BOARD_COLORS.map((c, i) => (
+                <label key={c} className="swatch" style={{ background: c }}>
                   <input
                     type="radio"
                     name="color"
-                    value={color}
+                    value={c}
                     aria-label={`Accent color ${i + 1}`}
-                    defaultChecked={board ? board.color === color : i === 0}
+                    checked={color === c}
+                    onChange={() => setColor(c)}
                   />
                 </label>
               ))}
@@ -75,6 +97,7 @@ export default function BoardModal({ board, onClose }: BoardModalProps) {
             </button>
           </div>
         </form>
+      </div>
     </Modal>
   );
 }
