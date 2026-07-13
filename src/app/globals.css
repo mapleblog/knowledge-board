@@ -717,6 +717,13 @@ body {
   background: rgba(255, 255, 255, 0.18);
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.55);
 }
+.surface .rail-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
 .surface .rail-name {
   font-size: 14px;
   font-weight: 600;
@@ -727,6 +734,41 @@ body {
 .surface .rail-name.is-placeholder {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.7);
+}
+.surface .rail-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.surface .rail-bar {
+  position: relative;
+  width: 100%;
+  max-width: 120px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+.surface .rail-bar i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+.surface .rail-bar i.ip {
+  background: rgba(255, 255, 255, 0.5);
+}
+.surface .rail-bar i.done {
+  background: #fff;
+}
+.surface .rail-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
 }
 .surface .split-body {
   flex: 1;
@@ -757,6 +799,16 @@ body {
     height: 44px;
     border-radius: 14px;
     font-size: 20px;
+  }
+  .surface .rail-meta {
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .surface .rail-progress {
+    align-items: flex-start;
+  }
+  .surface .rail-bar {
+    max-width: 160px;
   }
 }
 

@@ -21,11 +21,9 @@ export default function BoardModal({ board, onClose }: BoardModalProps) {
   const wasPending = useRef(false);
   const titleId = useId();
 
-  // Track name + color so the left rail previews the board as it's built.
+  // Track name + color; color drives the left rail's fill.
   const [name, setName] = useState(board?.name ?? "");
   const [color, setColor] = useState(board?.color ?? BOARD_COLORS[0]);
-  const trimmed = name.trim();
-  const initial = trimmed.charAt(0).toUpperCase();
 
   useEffect(() => {
     if (wasPending.current && !pending && !state?.error) {
@@ -36,12 +34,7 @@ export default function BoardModal({ board, onClose }: BoardModalProps) {
 
   return (
     <Modal onClose={onClose} labelledBy={titleId} className="board-modal-split">
-      <aside className="split-rail" style={{ "--rail": color } as CSSProperties}>
-        <span className="rail-ring">{initial}</span>
-        <span className={`rail-name${trimmed ? "" : " is-placeholder"}`}>
-          {trimmed || "Your board"}
-        </span>
-      </aside>
+      <aside className="split-rail" style={{ "--rail": color } as CSSProperties} />
       <div className="split-body">
         <h2 id={titleId}>{board ? "Edit board" : "New board"}</h2>
         <form action={formAction} className="auth-form board-form">
