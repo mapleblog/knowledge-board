@@ -19,6 +19,9 @@ export default function AttachmentItem({ attachment, url }: AttachmentItemProps)
     <div className="attachment-item">
       {isImage && url ? (
         <a href={url} target="_blank" rel="noreferrer noopener">
+          {/* Deliberate <img>: the src is a short-lived signed Supabase URL,
+              which next/image would re-proxy and cache pointlessly. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={url} alt={attachment.file_name} className="attachment-thumb" />
         </a>
       ) : (

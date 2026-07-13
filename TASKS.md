@@ -194,6 +194,50 @@ signed-upload flow). Findings below, worst first.
 
 ---
 
+## Code review follow-ups (2026-07-13 quality & architecture check)
+
+Re-ran the full check after the five UI commits (`a532d45`..`1ebd0e3`).
+Architecture unchanged and still sound. `tsc --noEmit` / `next build` were
+clean; `eslint` had regressed (item 1). All findings below fixed same day;
+`tsc`, `eslint --max-warnings=0`, and `next build` all clean afterwards.
+
+- [x] Fix: eslint regression — the attachment-open popup-blocked fallback in
+  `StepCard.tsx` used `window.location.href = url`, which the
+  `react-hooks/immutability` rule rejects as an error (lint exited 1; `next
+  build` unaffected since Next no longer lints during build). Fixed with the
+  semantically identical `window.location.assign(url)`
+- [x] Fix: deleting a card or board orphaned its attachment files in Storage —
+  `deleteCard`/`deleteBoard` relied on the DB cascade, which removes the
+  `attachments` *rows* but not the bucket objects, leaking unreachable files
+  against the free-tier quota. Fixed: both actions now collect the affected
+  `file_path`s and `storage.remove()` them **before** the row delete (order
+  matters: the storage delete policy traces ownership through the `cards`
+  row, so it must still exist when remove() runs). `deleteAttachment` already
+  cleaned up correctly
+- [x] Harden: card URLs are now validated server-side — `createCard`/
+  `updateCard` accepted any string (the `<input type="url">` check is
+  client-only) and it renders straight into `<a href>`; a stored
+  `javascript:` URL is self-XSS today (RLS: owner-only) but becomes stored
+  XSS against viewers once v2 shareable board links land. Both actions now
+  reject non-http(s) schemes (`isSafeHttpUrl` in `card-actions.ts`)
+- [x] Fix: keyboard drag swallowed the next click — `wasDragged` in
+  `StepCard.tsx` was set whenever a drag started but only cleared inside the
+  click handler; a keyboard drag (Space to lift/drop) fires no click, so the
+  stale flag ate the next genuine click instead of opening the detail modal.
+  Fixed: the flag now also clears on a zero-delay timeout when `isDragging`
+  goes false (after the drop's click, if any, has fired)
+- [x] Cosmetic: board progress bar filled from the right — `.progress` used
+  `justify-content: flex-end`, anchoring the segments to the right edge with
+  the amber in-progress segment left of the done segment. Removed the
+  `flex-end` and reordered the segments (done first, then in-progress) so the
+  bar fills left→right
+- [x] Cosmetic: annotated the deliberate `<img>` in `AttachmentItem.tsx` with
+  an inline `eslint-disable` + reason (signed short-lived Supabase URL —
+  `next/image` would re-proxy and cache it pointlessly) so the warning no
+  longer reads as an oversight
+
+---
+
 ## Phase 6 — Deployment (PRD §3 Deployment)
 
 - [ ] Deploy to Vercel (env vars wired to Supabase) — **config prepared** (see

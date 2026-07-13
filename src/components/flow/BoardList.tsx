@@ -48,13 +48,13 @@ export default function BoardList({
                     {done} of {total} done
                   </p>
                   <div className="progress">
+                    <i style={{ width: `${pct}%`, background: board.color }} />
                     {inProgressPct > 0 && (
                       <i
                         className="in-progress"
                         style={{ width: `${inProgressPct}%` }}
                       />
                     )}
-                    <i style={{ width: `${pct}%`, background: board.color }} />
                   </div>
                 </div>
               </button>

@@ -284,7 +284,6 @@ body {
 }
 .surface .progress {
   display: flex;
-  justify-content: flex-end;
   height: 5px;
   border-radius: 5px;
   background: #eef0f5;

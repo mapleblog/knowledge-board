@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { ATTACHMENTS_BUCKET } from "@/lib/attachment-constraints";
 import { resolveBoardColor } from "@/lib/types";
 
 export type BoardActionState = { error?: string } | null;
@@ -81,6 +82,20 @@ export async function deleteBoard(
   }
 
   const supabase = await createClient();
+
+  // Remove all attachment storage objects under this board's cards first:
+  // the DB cascade only deletes the attachments *rows*, and the storage
+  // delete policy traces ownership through the cards rows, so they must
+  // still exist when remove() runs.
+  const { data: attachments } = await supabase
+    .from("attachments")
+    .select("file_path, cards!inner(board_id)")
+    .eq("cards.board_id", id);
+  const paths = (attachments ?? []).map((a) => a.file_path);
+  if (paths.length > 0) {
+    await supabase.storage.from(ATTACHMENTS_BUCKET).remove(paths);
+  }
+
   const { error } = await supabase.from("boards").delete().eq("id", id);
 
   if (error) {

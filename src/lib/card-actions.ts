@@ -2,9 +2,24 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { ATTACHMENTS_BUCKET } from "@/lib/attachment-constraints";
 import type { CardStatus } from "@/lib/types";
 
 export type CardActionState = { error?: string } | null;
+
+/**
+ * Only http(s) URLs may be stored. The <input type="url"> check is
+ * client-side only; a stored javascript: href becomes XSS the moment boards
+ * are viewable by anyone but their owner (v2 shareable links).
+ */
+function isSafeHttpUrl(value: string): boolean {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 export async function createCard(
   _prevState: CardActionState,
@@ -20,6 +35,9 @@ export async function createCard(
   }
   if (!title) {
     return { error: "Card title is required." };
+  }
+  if (url && !isSafeHttpUrl(url)) {
+    return { error: "The URL must start with http:// or https://." };
   }
 
   const supabase = await createClient();
@@ -71,6 +89,9 @@ export async function updateCard(
   if (!title) {
     return { error: "Card title is required." };
   }
+  if (url && !isSafeHttpUrl(url)) {
+    return { error: "The URL must start with http:// or https://." };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -96,6 +117,19 @@ export async function deleteCard(
   }
 
   const supabase = await createClient();
+
+  // Remove the card's storage objects first: the DB cascade only deletes the
+  // attachments *rows*, and the storage delete policy traces ownership
+  // through the cards row, so it must still exist when remove() runs.
+  const { data: attachments } = await supabase
+    .from("attachments")
+    .select("file_path")
+    .eq("card_id", id);
+  const paths = (attachments ?? []).map((a) => a.file_path);
+  if (paths.length > 0) {
+    await supabase.storage.from(ATTACHMENTS_BUCKET).remove(paths);
+  }
+
   const { error } = await supabase.from("cards").delete().eq("id", id);
 
   if (error) {

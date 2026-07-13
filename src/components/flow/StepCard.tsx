@@ -50,7 +50,7 @@ export default function StepCard({
       if (url && tab) {
         tab.location.href = url;
       } else if (url) {
-        window.location.href = url;
+        window.location.assign(url);
       } else {
         tab?.close();
       }
@@ -65,7 +65,17 @@ export default function StepCard({
   // remember the drag so that click doesn't open the detail view.
   const wasDragged = useRef(false);
   useEffect(() => {
-    if (isDragging) wasDragged.current = true;
+    if (isDragging) {
+      wasDragged.current = true;
+      return;
+    }
+    // Clear the flag once the drop's click (if any) has fired: a keyboard
+    // drag produces no click at all, and without this the stale flag would
+    // swallow the next genuine click on the card.
+    const timeout = setTimeout(() => {
+      wasDragged.current = false;
+    });
+    return () => clearTimeout(timeout);
   }, [isDragging]);
 
   const style = {
