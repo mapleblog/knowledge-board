@@ -188,9 +188,10 @@ signed-upload flow). Findings below, worst first.
   `public.touch_updated_at` is now pinned empty — applied to the live project
   as migration `pin_search_path_on_touch_updated_at` and mirrored in
   `supabase/schema.sql`; advisor warning gone. Leaked-password protection is
-  an Auth dashboard toggle with no API/SQL surface — enable manually:
+  an Auth dashboard toggle with no API/SQL surface — **deferred 2026-07-14:
+  confirmed Pro-gated** (greyed out on the Free plan). Enable after upgrading:
   Dashboard → Authentication → Sign In / Providers → Passwords → "Prevent use
-  of leaked passwords" (may require the Pro plan)
+  of leaked passwords"
 
 ---
 
