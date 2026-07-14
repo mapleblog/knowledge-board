@@ -1,8 +1,11 @@
 @AGENTS.md
 
 ## Description
-
 When start new conversation, read first `CLAUDE.md`, `TASKS.md`, `STATUS.md`, `DESIGN.md` before start any task.
+
+---
+
+### Rules
 
 **When user trigger create prd**, run the following prompt
 
@@ -16,7 +19,7 @@ generate prd.md. Ask user to answer following core questions:
 6. theme styling
 ```
 
-
+---
 
 **When user ask to create wireframe/artifact**, run the following prompt
 
@@ -24,7 +27,7 @@ generate prd.md. Ask user to answer following core questions:
 Create 3 different set without repeat modern wireframe blueprint with medium fidelity grayscale boxes/placeholders, no real styling, annotation, just layout structure web-based playground based on `@prd`, save it as `wireframe.html`
 ```
 
-
+---
 
 **When user ask to create themes and styling playground**, run the following prompt
 
@@ -32,7 +35,7 @@ Create 3 different set without repeat modern wireframe blueprint with medium fid
 Invoke ui-ux-pro-max skill create 3 themes and styling CSS playground based on `@wireframe.html`, theme and styling css must fit to project, save it as `themes.html` in current directory
 ```
 
-
+---
 
 **When user trigger reverse-extracted**, make confirmation with user which theme prefer to, then run following prompt
 
@@ -40,7 +43,7 @@ Invoke ui-ux-pro-max skill create 3 themes and styling CSS playground based on `
 Reverse-extracted [USER-ANSWER] theme + tokens + styling css + UI components based on `@themes.html` save it as `DESIGN.md`
 ```
 
-
+---
 
 **When user trigger mockup**, run the following prompt
 
@@ -48,7 +51,7 @@ Reverse-extracted [USER-ANSWER] theme + tokens + styling css + UI components bas
 Run a real production-ready visual mockup based on `@wireframe.html` , using theme `@DESIGN.md`, save as `mockup.html`
 ```
 
-
+---
 
 **When user trigger resolve the PRD's open questions**, run following prompt
 
@@ -56,7 +59,15 @@ Run a real production-ready visual mockup based on `@wireframe.html` , using the
 resolve `@prd.md` open questions to prepare writing implementation code, save it as `finalize.md`
 ```
 
+File format following:
 
+```markdown
+P1: Next.js 16 App Router setup
+Verdict: ✅ Correct / ⚠️ Pending / 🚫 Blocking
+Action Needed:
+```
+
+---
 
 **When user ask for scaffold**, run the following prompt
 
@@ -70,7 +81,7 @@ the reference files will be:
 3. `@mockup.html` — read-only reference for proven layout and Canvas logic; will not be modified or copied
 ```
 
-
+---
 
 **When user trigger issue breakdown**, run following prompt
 
@@ -78,13 +89,15 @@ the reference files will be:
 Breakdown the tasks into smaller subtasks according phase based on `@finalize.md`, save it as `TASKS.md`
 ```
 
-
+---
 
 **When user trigger implement issue / start issue / start task**, run following prompt
 
 ```text
 Implement issue-by-issue based on `@TASKS.md`, **must update** when finish the tasks
 ```
+
+---
 
 **When user trigger QA check**, run following prompt
 
@@ -97,6 +110,8 @@ Analyze and Suggest the following audit check list, which one bext fit to run:
 5. Compliance & Accessibility
 6. Robustness & Error Handling
 ```
+
+---
 
 After finish audit check run, breakdown required actions into smaller subtasks, save them to following file , based on what audit checklist
 
@@ -111,11 +126,11 @@ File format following:
 
 ```markdown
 Item: Next.js 16 App Router setup
-Verdict: ✅ Correct
+Verdict: ✅ Correct / ⚠️ Pending / 🚫 Blocking
 Notes:
 ```
 
-
+---
 
 ## Hard Contraints
 
@@ -124,3 +139,4 @@ Notes:
 - Project security are strickly critical top priority, no vulnerubalities, no backdoor, no SQL injection 
 - Update summary conversation to `@STATUS`, by short and concise
 
+---
