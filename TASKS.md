@@ -240,11 +240,13 @@ clean; `eslint` had regressed (item 1). All findings below fixed same day;
 
 ## Phase 6 — Deployment (PRD §3 Deployment)
 
-- [ ] Deploy to Vercel (env vars wired to Supabase) — **config prepared** (see
+- [~] Deploy to Vercel (env vars wired to Supabase) — **config prepared** (see
   README "Deploying to Vercel"): app is zero-config for Vercel (no `vercel.json`
   needed), the only two env vars are documented, and the auth confirm route
-  already uses the request origin so it works on any domain. Remaining is the
-  manual action: push to GitHub, import in Vercel, set the two env vars, deploy.
+  already uses the request origin so it works on any domain. **Pushed to GitHub
+  2026-07-14** (`origin/main` at `3b20fe1`, `git@github.com:mapleblog/knowledge-board.git`)
+  after a clean `tsc` / `eslint --max-warnings=0` / `next build`. Remaining
+  manual action: import the repo in Vercel, set the two env vars, deploy.
 - [ ] Configure Supabase Auth redirect/site URLs for the deployed domain —
   **documented** (README): set Site URL + Redirect URLs (incl. a localhost and a
   preview-subdomain wildcard) once the Vercel domain exists. Dashboard-only step.
