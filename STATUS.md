@@ -29,6 +29,21 @@ typing), arrows + Enter navigate, Escape clears then blurs; empty state shows
 `eslint --max-warnings=0` / `next build` all clean. Remaining: a live
 phone-viewport browser pass (auth-gated). Next up: 7.2 Markdown descriptions.
 
+**v1.1 — 7.2 Markdown descriptions (2026-07-15):** Card descriptions now render
+as GitHub-flavored markdown in the detail modal. Added `react-markdown@10.1.0` +
+`remark-gfm@4.0.1`; new `Markdown.tsx` wrapper renders `card.description` in
+`CardDetailModal`. Storage is unchanged (the plain-text column stays the
+markdown *source* — no DB migration). **Security:** `rehype-raw` deliberately
+NOT enabled and the default `urlTransform` kept, so raw HTML is escaped and
+`javascript:` links are stripped; a custom `a` component forces
+`target="_blank" rel="noreferrer noopener"`. Verified via a server-render test —
+`<img onerror>` escapes to inert text, `[x](javascript:…)` → `href=""`, normal
+links keep the safe rel, GFM tables/task lists render. Timeline card preview
+(`StepCard`) left as plain text. `CardModal` textarea gained a "Markdown
+supported" hint. `tsc` / `eslint --max-warnings=0` / `next build` all clean.
+(The 2 moderate `npm audit` warnings are pre-existing — postcss inside Next's
+own tree — not from the new deps.) Next up: 7.3 Google OAuth.
+
 **Code review (2026-07-03):** a full quality & architecture check ran clean on `tsc --noEmit` and `eslint`; architecture judged sound (layering, RLS + server-side re-checks, signed-upload verification). One real bug found and **fixed same day**: `KnowledgeBoardApp.tsx`'s shared reorder debounce timeout dropped card A's pending write when card B was dragged within 300ms — pending writes are now keyed per card in a `pendingReorders` Map and flushed on unmount (`tsc`/`eslint` clean; browser-verified 2026-07-03 — two cards dragged within 300ms both persisted after reload). The second finding — error-swallowing in the void server actions (`deleteBoard`, `deleteCard`, `reorderCard`, `updateCardStatus`, `deleteAttachment`) — is also fixed: all five now return `{ error }` state, delete modals and the attachment row report via `useActionState` (modal stays open with the error), and reorder/status-toggle failures show a dismissible banner while revalidating so the optimistic UI snaps back. The unreachable `in_progress` status is also fixed: timeline nodes now cycle next up → in progress → done → next up, with a distinct in-progress node style. Remaining smaller consistency items are listed under "Code review follow-ups" in [`TASKS.md`](TASKS.md). Nothing blocks Phase 5/6.
 
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.

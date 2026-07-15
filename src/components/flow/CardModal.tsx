@@ -50,7 +50,8 @@ export default function CardModal({ boardId, card, onClose }: CardModalProps) {
           </label>
           <label className="field">
             <span>Description (optional)</span>
-            <textarea name="description" rows={3} defaultValue={card?.description ?? ""} />
+            <textarea name="description" rows={4} defaultValue={card?.description ?? ""} />
+            <span className="field-hint">Markdown supported</span>
           </label>
           <label className="field">
             <span>URL (optional)</span>

@@ -295,22 +295,24 @@ Google Cloud + Supabase config). No DB migrations for any of the three.
 Render-layer change only — the plain-text `description` column stays the
 markdown *source*, no DB migration.
 
-- [ ] Add `react-markdown` + `remark-gfm` deps (`package.json`)
-- [ ] New `Markdown.tsx` wrapper — **do NOT enable `rehype-raw`** (default HTML
-  escaping is what prevents stored XSS); keep default `urlTransform` (strips
-  `javascript:` etc.)
-- [ ] Render `card.description` through `Markdown.tsx` in `CardDetailModal.tsx`
-- [ ] Markdown links must carry `target="_blank" rel="noreferrer noopener"`
-  (match the existing `card.url` anchor)
-- [ ] Style rendered elements (headings, lists, `code`, `blockquote`, links,
-  tables) in `globals.css`, scoped to a `.markdown` container
-- [ ] Keep `StepCard.tsx` timeline preview as **plain text** (truncated raw
-  snippet, not rendered markdown)
-- [ ] Editing UX: keep the textarea in `CardModal.tsx`, add a "Markdown
-  supported" hint (optional stretch: write/preview tab toggle)
-- [ ] XSS test: `<img src=x onerror=alert(1)>` and `[x](javascript:alert(1))`
-  render inert
-- [ ] `tsc` / `eslint --max-warnings=0` / `next build` clean
+- [x] Add `react-markdown` (10.1.0) + `remark-gfm` (4.0.1) deps (`package.json`)
+- [x] New `Markdown.tsx` wrapper — **`rehype-raw` deliberately NOT enabled**
+  (default HTML escaping prevents stored XSS); default `urlTransform` kept
+  (strips `javascript:` etc.)
+- [x] Render `card.description` through `Markdown.tsx` in `CardDetailModal.tsx`
+- [x] Markdown links carry `target="_blank" rel="noreferrer noopener"` via a
+  custom `a` component (matches the existing `card.url` anchor)
+- [x] Style rendered elements (headings, lists, `code`/`pre`, `blockquote`,
+  links, tables, task lists, `hr`, `img`) in `globals.css`, scoped to
+  `.markdown`
+- [x] `StepCard.tsx` timeline preview left as-is — **plain text** `<p>` (not
+  rendered markdown)
+- [x] Editing UX: textarea kept in `CardModal.tsx` (rows 3→4) + a "Markdown
+  supported" `.field-hint` (write/preview toggle deferred as optional stretch)
+- [x] XSS test **verified** via server render: `<img src=x onerror=alert(1)>`
+  escapes to inert text; `[x](javascript:alert(1))` → `href=""`; normal links
+  keep the safe rel; GFM tables/task lists render
+- [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
 
 ### 7.3 — Google OAuth login · Effort: M–L (mostly external config)
 

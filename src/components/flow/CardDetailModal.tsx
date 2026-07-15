@@ -6,6 +6,7 @@ import { linkLabel, statusPill } from "@/lib/board";
 import { getAttachmentUrls } from "@/lib/attachment-actions";
 import AttachmentItem from "./AttachmentItem";
 import AttachmentUploader from "./AttachmentUploader";
+import Markdown from "./Markdown";
 import Modal from "./Modal";
 
 type CardDetailModalProps = {
@@ -42,7 +43,7 @@ export default function CardDetailModal({ card, onClose, onEdit, onDelete }: Car
       <h2 id={titleId}>{card.title}</h2>
         <span className={`mini${pill.accent ? " accent" : ""}`}>{pill.label}</span>
 
-        {card.description && <p className="tag">{card.description}</p>}
+        {card.description && <Markdown>{card.description}</Markdown>}
 
         {card.url && (
           <p>

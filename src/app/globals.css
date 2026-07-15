@@ -745,6 +745,114 @@ body {
   border-color: var(--accent);
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
 }
+.surface .field-hint {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ---- Rendered markdown (card description in the detail modal) ---- */
+.surface .markdown {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.surface .markdown > *:first-child {
+  margin-top: 0;
+}
+.surface .markdown > *:last-child {
+  margin-bottom: 0;
+}
+.surface .markdown p {
+  margin: 0 0 10px;
+}
+.surface .markdown h1,
+.surface .markdown h2,
+.surface .markdown h3,
+.surface .markdown h4 {
+  margin: 16px 0 8px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.surface .markdown h1 {
+  font-size: 18px;
+}
+.surface .markdown h2 {
+  font-size: 16px;
+}
+.surface .markdown h3,
+.surface .markdown h4 {
+  font-size: 14px;
+}
+.surface .markdown ul,
+.surface .markdown ol {
+  margin: 0 0 10px;
+  padding-left: 22px;
+}
+.surface .markdown li {
+  margin: 2px 0;
+}
+.surface .markdown li input[type="checkbox"] {
+  margin-right: 6px;
+}
+.surface .markdown a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.surface .markdown a:hover {
+  text-decoration: underline;
+}
+.surface .markdown code {
+  font-family: ui-monospace, "SFMono-Regular", "Menlo", monospace;
+  font-size: 0.88em;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: #f2f3f8;
+}
+.surface .markdown pre {
+  margin: 0 0 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f2f3f8;
+  overflow-x: auto;
+}
+.surface .markdown pre code {
+  padding: 0;
+  background: none;
+}
+.surface .markdown blockquote {
+  margin: 0 0 10px;
+  padding: 2px 12px;
+  border-left: 3px solid var(--line);
+  color: var(--muted);
+}
+.surface .markdown table {
+  width: 100%;
+  margin: 0 0 10px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.surface .markdown th,
+.surface .markdown td {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+.surface .markdown th {
+  background: #f2f3f8;
+  font-weight: 700;
+}
+.surface .markdown img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+.surface .markdown hr {
+  margin: 14px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
 /* ---- Board modal: floating-label fields ---- */
 /* Scoped to .board-form so the shared login/signup .field styling is untouched.
    The <span> label sits over the input and floats up into the outlined border
