@@ -64,6 +64,15 @@ Supabase Auth with the client ID/secret, and the 3-environment (localhost /
 preview / prod) round-trip test. This completes the v1.1 code; Phase 7 is
 code-complete pending that external config.
 
+**Repo hygiene — branch cleanup (2026-07-15):** Consolidated to a single
+branch. The stale `master` (15 commits behind, fully contained in `main`) was
+removed on GitHub: switched the repo's default branch `master` → `main` (via
+`gh repo edit --default-branch main` after installing + authenticating the
+GitHub CLI), then `git push origin --delete master` and pruned local tracking
+refs. Final state: local `main` only, remote `origin/main` only, GitHub default
+`main` (confirmed `git ls-remote --symref origin HEAD` → `refs/heads/main`). No
+history lost. `gh` 2.96.0 is now installed and authenticated on this machine.
+
 **Code review (2026-07-03):** a full quality & architecture check ran clean on `tsc --noEmit` and `eslint`; architecture judged sound (layering, RLS + server-side re-checks, signed-upload verification). One real bug found and **fixed same day**: `KnowledgeBoardApp.tsx`'s shared reorder debounce timeout dropped card A's pending write when card B was dragged within 300ms — pending writes are now keyed per card in a `pendingReorders` Map and flushed on unmount (`tsc`/`eslint` clean; browser-verified 2026-07-03 — two cards dragged within 300ms both persisted after reload). The second finding — error-swallowing in the void server actions (`deleteBoard`, `deleteCard`, `reorderCard`, `updateCardStatus`, `deleteAttachment`) — is also fixed: all five now return `{ error }` state, delete modals and the attachment row report via `useActionState` (modal stays open with the error), and reorder/status-toggle failures show a dismissible banner while revalidating so the optimistic UI snaps back. The unreachable `in_progress` status is also fixed: timeline nodes now cycle next up → in progress → done → next up, with a distinct in-progress node style. Remaining smaller consistency items are listed under "Code review follow-ups" in [`TASKS.md`](TASKS.md). Nothing blocks Phase 5/6.
 
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.
