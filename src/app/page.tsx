@@ -10,15 +10,23 @@ export default async function Home() {
   // proxy.ts already redirects unauthenticated requests to /login, so a
   // user is expected here.
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  const { data: boards, error } = await supabase
-    .from("boards")
-    .select("*, cards(*, attachments(*))")
-    .order("created_at", { ascending: true })
-    .order("order_index", { referencedTable: "cards", ascending: true });
+  // These two are independent — the boards query authorizes through the
+  // session cookie (RLS), not through the getUser() result — so run them
+  // concurrently instead of paying two serial Supabase round-trips.
+  const [
+    {
+      data: { user },
+    },
+    { data: boards, error },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("boards")
+      .select("*, cards(*, attachments(*))")
+      .order("created_at", { ascending: true })
+      .order("order_index", { referencedTable: "cards", ascending: true }),
+  ]);
 
   // A failed fetch must not look like "you have no boards" — throw so the
   // route's error boundary (error.tsx) shows a retry instead of the empty state.
