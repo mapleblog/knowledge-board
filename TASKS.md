@@ -258,7 +258,93 @@ clean; `eslint` had regressed (item 1). All findings below fixed same day;
 
 ---
 
+## Phase 7 — v1.1 (PRD §5 Roadmap; scoped in [`V1.1-SCOPE.md`](V1.1-SCOPE.md))
+
+Three self-contained features. **Recommended build order: Search → Markdown →
+Google OAuth** (smallest/self-contained first; OAuth last because of external
+Google Cloud + Supabase config). No DB migrations for any of the three.
+**Effort:** S = ≤½ day · M = ~1–2 days · L = ~3+ days (incl. external setup).
+
+### 7.1 — Search across a user's cards · Effort: S
+
+100% client-side over `initialBoards` (already fetched in `page.tsx` with cards
++ attachments). No new query, server action, or DB/RLS change.
+
+- [ ] New `CardSearch.tsx` component (search input + results list)
+- [ ] Add search input to the top bar in `KnowledgeBoardApp.tsx`; on ≤520px it
+  lives inside the existing hamburger dropdown
+- [ ] Filter cards by case-insensitive substring on `title`, `description`,
+  `url` across all `initialBoards`
+- [ ] Results UI: dropdown/overlay grouped by board; each row shows board accent
+  + card title + matched-text snippet (escape the query for the highlight regex)
+- [ ] Click a result → select that board and open its `CardDetailModal`
+- [ ] Empty state ("No cards match '<query>'") + clear/Escape-to-close
+- [ ] Keyboard: `/` or `Ctrl/Cmd+K` focuses search; arrow keys + Enter navigate
+- [ ] Results styling in `globals.css`
+- [ ] Verify on a phone-sized viewport (input in the hamburger menu)
+- [ ] `tsc` / `eslint --max-warnings=0` / `next build` clean
+
+### 7.2 — Markdown in card descriptions · Effort: S–M
+
+Render-layer change only — the plain-text `description` column stays the
+markdown *source*, no DB migration.
+
+- [ ] Add `react-markdown` + `remark-gfm` deps (`package.json`)
+- [ ] New `Markdown.tsx` wrapper — **do NOT enable `rehype-raw`** (default HTML
+  escaping is what prevents stored XSS); keep default `urlTransform` (strips
+  `javascript:` etc.)
+- [ ] Render `card.description` through `Markdown.tsx` in `CardDetailModal.tsx`
+- [ ] Markdown links must carry `target="_blank" rel="noreferrer noopener"`
+  (match the existing `card.url` anchor)
+- [ ] Style rendered elements (headings, lists, `code`, `blockquote`, links,
+  tables) in `globals.css`, scoped to a `.markdown` container
+- [ ] Keep `StepCard.tsx` timeline preview as **plain text** (truncated raw
+  snippet, not rendered markdown)
+- [ ] Editing UX: keep the textarea in `CardModal.tsx`, add a "Markdown
+  supported" hint (optional stretch: write/preview tab toggle)
+- [ ] XSS test: `<img src=x onerror=alert(1)>` and `[x](javascript:alert(1))`
+  render inert
+- [ ] `tsc` / `eslint --max-warnings=0` / `next build` clean
+
+### 7.3 — Google OAuth login · Effort: M–L (mostly external config)
+
+OAuth uses `exchangeCodeForSession` (not the email flow's `verifyOtp`), so it
+needs its own callback route. RLS/data model unchanged — OAuth users get the
+same `auth.uid()`.
+
+**Code**
+- [ ] New route `src/app/auth/callback/route.ts` — read `?code`, call
+  `exchangeCodeForSession(code)`, redirect to `/` on success or
+  `/login?error=oauth-failed` on failure; mirror the origin-based redirect in
+  `auth/confirm/route.ts`
+- [ ] Client handler to kick off `signInWithOAuth({ provider: 'google',
+  options: { redirectTo: `${origin}/auth/callback` } })` (needs
+  `window.location`; use the browser client in `src/lib/supabase/client.ts`)
+- [ ] "Continue with Google" button + "or" divider on `LoginForm.tsx` and
+  `signup/page.tsx` (optional shared `GoogleButton.tsx`); button/divider styling
+  in `globals.css`
+
+**External setup (account-gated, like the deploy)**
+- [ ] Google Cloud Console: project → OAuth consent screen → OAuth 2.0 Client ID
+  (Web); authorized redirect URI = `https://<project-ref>.supabase.co/auth/v1/callback`
+- [ ] Supabase → Authentication → Providers → Google: paste client ID + secret,
+  enable
+- [ ] Confirm app redirect URLs include prod domain + localhost + preview wildcard
+
+**Verify**
+- [ ] Round-trip completes and lands an authenticated session on `/` — test on
+  localhost, a Vercel preview, and production (redirect-URI mismatch is the
+  classic failure)
+- [ ] A Google user sees only their own boards (RLS spot-check)
+- [ ] OAuth failure redirects to `/login` with a generic error
+- [ ] Decide + document email/Google account-linking behavior (Supabase default
+  is usually link-by-verified-email — confirm)
+- [ ] `tsc` / `eslint --max-warnings=0` / `next build` clean
+
+---
+
 ## Post-MVP (deferred — PRD §5 Roadmap)
 
-- **v1.1:** Google OAuth · markdown in descriptions · search across a user's cards
+- **v1.1:** Google OAuth · markdown in descriptions · search across a user's
+  cards — **broken down in Phase 7 above.**
 - **v2.0:** shareable read-only board links · move cards between boards · tagging/filtering · list virtualization if boards exceed ~100 cards
