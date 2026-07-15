@@ -44,6 +44,26 @@ supported" hint. `tsc` / `eslint --max-warnings=0` / `next build` all clean.
 (The 2 moderate `npm audit` warnings are pre-existing — postcss inside Next's
 own tree — not from the new deps.) Next up: 7.3 Google OAuth.
 
+**v1.1 — 7.3 Google OAuth (2026-07-15, code complete; external setup pending):**
+The code side of "Continue with Google" is done. New `auth/callback/route.ts`
+exchanges the OAuth `?code` for a session (`exchangeCodeForSession` — distinct
+from the email flow's `verifyOtp`), redirecting to `/` on success or
+`/login?error=oauth-failed` on failure, origin-based so it works on any domain.
+New client `GoogleButton.tsx` starts the flow via `signInWithOAuth({ provider:
+'google', redirectTo: `${origin}/auth/callback` })`; added to both `LoginForm`
+and the signup page with an "or" divider + Google-icon styling. **Bug caught &
+fixed during build:** `/auth/callback` had to be added to `PUBLIC_PATHS` in
+`proxy.ts` — otherwise the unauthenticated callback gets redirected to `/login`,
+dropping `?code`. RLS unchanged (OAuth users get the same `auth.uid()`).
+**Account-linking decision:** rely on Supabase's default link-by-verified-email
+(Google emails are verified → same address = same account); confirm the Auth
+setting during live testing. `tsc` / `eslint --max-warnings=0` / `next build`
+clean; `/auth/callback` registered. **Still needs the account owner** (like the
+Vercel deploy): Google Cloud OAuth client + consent screen, enabling Google in
+Supabase Auth with the client ID/secret, and the 3-environment (localhost /
+preview / prod) round-trip test. This completes the v1.1 code; Phase 7 is
+code-complete pending that external config.
+
 **Code review (2026-07-03):** a full quality & architecture check ran clean on `tsc --noEmit` and `eslint`; architecture judged sound (layering, RLS + server-side re-checks, signed-upload verification). One real bug found and **fixed same day**: `KnowledgeBoardApp.tsx`'s shared reorder debounce timeout dropped card A's pending write when card B was dragged within 300ms — pending writes are now keyed per card in a `pendingReorders` Map and flushed on unmount (`tsc`/`eslint` clean; browser-verified 2026-07-03 — two cards dragged within 300ms both persisted after reload). The second finding — error-swallowing in the void server actions (`deleteBoard`, `deleteCard`, `reorderCard`, `updateCardStatus`, `deleteAttachment`) — is also fixed: all five now return `{ error }` state, delete modals and the attachment row report via `useActionState` (modal stays open with the error), and reorder/status-toggle failures show a dismissible banner while revalidating so the optimistic UI snaps back. The unreachable `in_progress` status is also fixed: timeline nodes now cycle next up → in progress → done → next up, with a distinct in-progress node style. Remaining smaller consistency items are listed under "Code review follow-ups" in [`TASKS.md`](TASKS.md). Nothing blocks Phase 5/6.
 
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.

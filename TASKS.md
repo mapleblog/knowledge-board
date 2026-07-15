@@ -320,34 +320,40 @@ OAuth uses `exchangeCodeForSession` (not the email flow's `verifyOtp`), so it
 needs its own callback route. RLS/data model unchanged — OAuth users get the
 same `auth.uid()`.
 
-**Code**
-- [ ] New route `src/app/auth/callback/route.ts` — read `?code`, call
-  `exchangeCodeForSession(code)`, redirect to `/` on success or
-  `/login?error=oauth-failed` on failure; mirror the origin-based redirect in
+**Code** — all landed 2026-07-15
+- [x] New route `src/app/auth/callback/route.ts` — reads `?code`, calls
+  `exchangeCodeForSession(code)`, redirects to `/` on success or
+  `/login?error=oauth-failed` on failure; mirrors the origin-based redirect in
   `auth/confirm/route.ts`
-- [ ] Client handler to kick off `signInWithOAuth({ provider: 'google',
-  options: { redirectTo: `${origin}/auth/callback` } })` (needs
-  `window.location`; use the browser client in `src/lib/supabase/client.ts`)
-- [ ] "Continue with Google" button + "or" divider on `LoginForm.tsx` and
-  `signup/page.tsx` (optional shared `GoogleButton.tsx`); button/divider styling
-  in `globals.css`
+- [x] `GoogleButton.tsx` (client) kicks off `signInWithOAuth({ provider:
+  'google', options: { redirectTo: `${window.location.origin}/auth/callback` }
+  })` via the browser client, with pending + start-failure error states
+- [x] "Continue with Google" button + "or" divider on `LoginForm.tsx` and
+  `signup/page.tsx`; button/divider/Google-icon styling in `globals.css`
+- [x] Added `/auth/callback` to `PUBLIC_PATHS` in `src/lib/supabase/proxy.ts`
+  (else the unauthenticated callback is redirected to `/login`, dropping `?code`)
+- [x] `oauth-failed` copy added to `login/page.tsx` `ERROR_MESSAGES`
 
-**External setup (account-gated, like the deploy)**
+**External setup (account-gated, like the deploy — needs the account owner)**
 - [ ] Google Cloud Console: project → OAuth consent screen → OAuth 2.0 Client ID
   (Web); authorized redirect URI = `https://<project-ref>.supabase.co/auth/v1/callback`
 - [ ] Supabase → Authentication → Providers → Google: paste client ID + secret,
   enable
 - [ ] Confirm app redirect URLs include prod domain + localhost + preview wildcard
 
-**Verify**
+**Verify** (blocked on the external setup above)
 - [ ] Round-trip completes and lands an authenticated session on `/` — test on
   localhost, a Vercel preview, and production (redirect-URI mismatch is the
   classic failure)
 - [ ] A Google user sees only their own boards (RLS spot-check)
-- [ ] OAuth failure redirects to `/login` with a generic error
-- [ ] Decide + document email/Google account-linking behavior (Supabase default
-  is usually link-by-verified-email — confirm)
-- [ ] `tsc` / `eslint --max-warnings=0` / `next build` clean
+- [~] OAuth failure redirects to `/login` with a generic error — code path in
+  place (`?error=oauth-failed` → generic message); live-verify after setup
+- [~] Decide + document email/Google account-linking behavior — **decision:**
+  rely on Supabase's default *link-by-verified-email* (Google emails are
+  verified, so a Google sign-in with an address already registered via
+  email/password resolves to the same `auth.uid()` / same boards). Confirm this
+  is still the project's Auth setting during live testing before relying on it
+- [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
 
 ---
 

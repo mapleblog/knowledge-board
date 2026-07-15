@@ -3,12 +3,18 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signIn } from "@/lib/auth-actions";
+import GoogleButton from "@/components/auth/GoogleButton";
 
 export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const [state, formAction, pending] = useActionState(signIn, null);
 
   return (
     <>
+      <GoogleButton label="Log in with Google" />
+      <div className="auth-divider">
+        <span>or</span>
+      </div>
+
       <form action={formAction} className="auth-form">
         <input type="hidden" name="redirectTo" value={redirectTo ?? ""} />
         <label className="field">

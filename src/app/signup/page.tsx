@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signUp } from "@/lib/auth-actions";
+import GoogleButton from "@/components/auth/GoogleButton";
 
 export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signUp, null);
@@ -16,6 +17,11 @@ export default function SignupPage() {
         </div>
         <h1>Create an account</h1>
         <p className="tag">Sequence what to learn next.</p>
+
+        <GoogleButton label="Sign up with Google" />
+        <div className="auth-divider">
+          <span>or</span>
+        </div>
 
         <form action={formAction} className="auth-form">
           <label className="field">

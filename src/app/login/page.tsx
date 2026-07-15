@@ -4,6 +4,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   "confirmation-failed":
     "That confirmation link is invalid or has expired. Please sign up again or request a new link.",
   "sign-out-failed": "Something went wrong signing you out. Please try again.",
+  "oauth-failed": "Google sign-in didn’t complete. Please try again.",
 };
 
 export default async function LoginPage({
