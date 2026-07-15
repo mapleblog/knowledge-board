@@ -16,6 +16,7 @@ import DeleteBoardModal from "./DeleteBoardModal";
 import CardModal from "./CardModal";
 import CardDetailModal from "./CardDetailModal";
 import DeleteCardModal from "./DeleteCardModal";
+import CardSearch from "./CardSearch";
 import SessionMenu from "@/components/auth/SessionMenu";
 
 /** How long to wait after the last drag move before writing the new order_index. */
@@ -148,6 +149,14 @@ export default function KnowledgeBoardApp({
             <span />
           </button>
           <div className={menuOpen ? "top-actions open" : "top-actions"}>
+            <CardSearch
+              boards={boards}
+              onSelect={(boardId, card) => {
+                setActiveId(boardId);
+                setCardDetail(card);
+                setMenuOpen(false);
+              }}
+            />
             {userEmail ? (
               <SessionMenu email={userEmail} />
             ) : (

@@ -599,6 +599,109 @@ body {
   text-decoration: none;
 }
 
+/* ---- Card search (top bar) ---- */
+.surface .card-search {
+  position: relative;
+}
+.surface .card-search-input {
+  width: 220px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 13px;
+}
+.surface .card-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+.surface .card-search-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  width: min(360px, 90vw);
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px -20px rgba(20, 24, 60, 0.4);
+}
+.surface .card-search-empty {
+  margin: 0;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.surface .card-search-group + .card-search-group {
+  margin-top: 4px;
+}
+.surface .card-search-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.surface .card-search-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.surface .card-search-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font);
+}
+.surface .card-search-row.on {
+  background: #eef0ff;
+}
+.surface .card-search-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.surface .card-search-snippet {
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.surface .card-search mark {
+  background: rgba(245, 158, 11, 0.28);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+@media (max-width: 520px) {
+  .surface .card-search-input {
+    width: 100%;
+  }
+  .surface .card-search-panel {
+    width: 100%;
+  }
+}
+
 /* ---- Modals (new/edit board, delete confirm) ---- */
 .surface .modal-overlay {
   position: fixed;

@@ -270,19 +270,25 @@ Google Cloud + Supabase config). No DB migrations for any of the three.
 100% client-side over `initialBoards` (already fetched in `page.tsx` with cards
 + attachments). No new query, server action, or DB/RLS change.
 
-- [ ] New `CardSearch.tsx` component (search input + results list)
-- [ ] Add search input to the top bar in `KnowledgeBoardApp.tsx`; on ≤520px it
-  lives inside the existing hamburger dropdown
-- [ ] Filter cards by case-insensitive substring on `title`, `description`,
-  `url` across all `initialBoards`
-- [ ] Results UI: dropdown/overlay grouped by board; each row shows board accent
-  + card title + matched-text snippet (escape the query for the highlight regex)
-- [ ] Click a result → select that board and open its `CardDetailModal`
-- [ ] Empty state ("No cards match '<query>'") + clear/Escape-to-close
-- [ ] Keyboard: `/` or `Ctrl/Cmd+K` focuses search; arrow keys + Enter navigate
-- [ ] Results styling in `globals.css`
-- [ ] Verify on a phone-sized viewport (input in the hamburger menu)
-- [ ] `tsc` / `eslint --max-warnings=0` / `next build` clean
+- [x] New `CardSearch.tsx` component (search input + results list)
+- [x] Add search input to the top bar in `KnowledgeBoardApp.tsx` (inside
+  `.top-actions`); on ≤520px it lives inside the existing hamburger dropdown
+- [x] Filter cards by case-insensitive substring on `title`, `description`,
+  `url` across all `initialBoards` (memoized over `boards`)
+- [x] Results UI: dropdown/overlay grouped by board; each row shows board accent
+  dot + card title + matched-text snippet (query escaped for the highlight
+  regex; long fields windowed with `…` around the first match)
+- [x] Click a result → select that board (`setActiveId`) and open its
+  `CardDetailModal` (`setCardDetail`)
+- [x] Empty state ("No cards match '<query>'") + clear/Escape-to-close (Escape
+  clears the query, then blurs; result click clears + closes; blur-out closes)
+- [x] Keyboard: `/` or `Ctrl/Cmd+K` focuses search (`/` suppressed while typing
+  in an input/textarea); ArrowUp/Down cycle rows; Enter opens the active row
+- [x] Results styling in `globals.css` (`.card-search*`, `<mark>` highlight,
+  mobile full-width panel)
+- [~] Verify on a phone-sized viewport (input in the hamburger menu) — CSS done
+  (full-width input + panel ≤520px); live browser pass still worth doing (auth-gated)
+- [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
 
 ### 7.2 — Markdown in card descriptions · Effort: S–M
 
