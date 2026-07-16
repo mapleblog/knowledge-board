@@ -6,6 +6,68 @@ import { ATTACHMENTS_BUCKET } from "@/lib/attachment-constraints";
 import { resolveBoardColor } from "@/lib/types";
 
 export type BoardActionState = { error?: string } | null;
+export type ShareActionState = { error?: string; token?: string } | null;
+
+/**
+ * Enable (or rotate) a board's public read-only share link by assigning a fresh
+ * random token. Rotating invalidates any previously shared URL. The redundant
+ * `user_id` filter is defense-in-depth on top of the owner-only RLS.
+ */
+export async function setShareToken(boardId: string): Promise<ShareActionState> {
+  if (!boardId) {
+    return { error: "Missing board." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "You must be signed in." };
+  }
+
+  const token = crypto.randomUUID();
+  const { error } = await supabase
+    .from("boards")
+    .update({ share_token: token })
+    .eq("id", boardId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { error: "Could not create the share link. Please try again." };
+  }
+
+  revalidatePath("/");
+  return { token };
+}
+
+/** Revoke a board's share link (set the token back to null → link 404s). */
+export async function revokeShareLink(boardId: string): Promise<ShareActionState> {
+  if (!boardId) {
+    return { error: "Missing board." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "You must be signed in." };
+  }
+
+  const { error } = await supabase
+    .from("boards")
+    .update({ share_token: null })
+    .eq("id", boardId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { error: "Could not stop sharing. Please try again." };
+  }
+
+  revalidatePath("/");
+  return null;
+}
 
 export async function createBoard(
   _prevState: BoardActionState,

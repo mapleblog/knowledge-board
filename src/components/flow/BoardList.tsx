@@ -11,6 +11,7 @@ type BoardListProps = {
   onNewBoard: () => void;
   onEditBoard: (board: Board) => void;
   onDeleteBoard: (board: Board) => void;
+  onShareBoard: (board: Board) => void;
 };
 
 /** Left column: the user's boards, each with an accent ring and progress bar. */
@@ -21,6 +22,7 @@ export default function BoardList({
   onNewBoard,
   onEditBoard,
   onDeleteBoard,
+  onShareBoard,
 }: BoardListProps) {
   return (
     <div>
@@ -59,6 +61,19 @@ export default function BoardList({
                 </div>
               </button>
               <div className="b-actions">
+                <button
+                  type="button"
+                  className={`icon-btn${board.share_token ? " on" : ""}`}
+                  aria-label={
+                    board.share_token
+                      ? `Sharing ${board.name} — manage link`
+                      : `Share ${board.name}`
+                  }
+                  title={board.share_token ? "Shared — manage link" : "Share"}
+                  onClick={() => onShareBoard(board)}
+                >
+                  🔗
+                </button>
                 <button
                   type="button"
                   className="icon-btn"

@@ -154,4 +154,28 @@ would corrupt `order_index`); the filter clears on board switch. `tsc` /
 `eslint --max-warnings=0` / `next build` all clean. Remaining: run the migration,
 then an auth-gated browser pass. Next up: 8.3 Shareable links.
 
+**v2.0 — 8.3 Shareable read-only board links (2026-07-16, code complete;
+migration applied):** The app's first public (unauthenticated) read path.
+**Migration `0002_shareable_board_links.sql`** (mirrored in `schema.sql`; types
+hand-updated): adds `boards.share_token uuid unique` and a `security definer`
+`get_shared_board(token)` function that returns a **safe read-only JSON
+projection** (board id/name/description/color + cards' id/title/description/url/
+status/tags/order_index — **no user_id, no attachments, no token**), matched on
+the unguessable token; `search_path=''`, `revoke all from public` +
+`grant execute to anon, authenticated`. **Table RLS is NOT loosened** — the
+function is the single controlled read path. **Applied to the live project
+`bruzjjsqcmmzptamkhrw` via the SQL Editor 2026-07-16.** **Code:** public
+route `src/app/share/[token]/page.tsx` (added `/share` to `PUBLIC_PATHS` in
+`proxy.ts`) — uuid-guards the token, calls the RPC, `notFound()`s on
+invalid/revoked/missing (no enumeration signal), `robots:{index:false}`;
+`SharedBoardView` is presentational read-only (no server actions, no
+drag/status/delete, attachments excluded), reusing the v1.1 safe-markdown render
+(no `rehype-raw`, `javascript:` stripped) plus an `isSafeHttpUrl` guard on
+`card.url` as defense-in-depth. Owner UI: `ShareBoardModal` (create/copy/rotate/
+revoke) + a 🔗 button in `BoardList`; `setShareToken`/`revokeShareLink` actions
+generate the token via `crypto.randomUUID()` with a redundant `user_id` filter
+on top of RLS. `tsc` / `eslint --max-warnings=0` / `next build` all clean.
+Remaining: run the migration, then a signed-out browser pass + a focused security
+review. Next up: 8.4 is parked; v2.0 built set essentially complete.
+
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.

@@ -10,6 +10,9 @@ create table if not exists public.boards (
   name        text not null check (char_length(name) between 1 and 120),
   description text,
   color       text not null default '#4f46e5',
+  -- null = private; a random uuid = "anyone with the link can view" (read-only).
+  -- Exposed publicly only through get_shared_board() below, never via RLS.
+  share_token uuid unique,
   created_at  timestamptz not null default now()
 );
 
@@ -107,6 +110,48 @@ drop trigger if exists cards_touch_updated_at on public.cards;
 create trigger cards_touch_updated_at
   before update on public.cards
   for each row execute function public.touch_updated_at();
+
+-- ---------- Shareable read-only board links (v2.0) ----------
+-- The app's only public (unauthenticated) read path. Table RLS above stays
+-- owner-only; this security-definer function is the single controlled way an
+-- anon visitor reads a board — matched on the unguessable share_token, and
+-- returning only safe read-only fields (no user_id, no attachments, no token).
+-- Granted to anon/authenticated only; revoke a share by nulling share_token.
+create or replace function public.get_shared_board(share_token uuid)
+returns jsonb
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select jsonb_build_object(
+    'id', b.id,
+    'name', b.name,
+    'description', b.description,
+    'color', b.color,
+    'cards', coalesce((
+      select jsonb_agg(
+        jsonb_build_object(
+          'id', c.id,
+          'title', c.title,
+          'description', c.description,
+          'url', c.url,
+          'status', c.status,
+          'tags', c.tags,
+          'order_index', c.order_index
+        ) order by c.order_index asc
+      )
+      from public.cards c
+      where c.board_id = b.id
+    ), '[]'::jsonb)
+  )
+  from public.boards b
+  where b.share_token = get_shared_board.share_token
+  limit 1;
+$$;
+
+revoke all on function public.get_shared_board(uuid) from public;
+grant execute on function public.get_shared_board(uuid) to anon, authenticated;
 
 -- ---------- Storage (attachments) ----------
 -- Manual step: create a private bucket named "attachments" (Storage → New

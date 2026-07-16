@@ -406,11 +406,26 @@ links add the app's first public read path (security-critical).
 
 ### 8.3 — Shareable read-only board links · Effort: L · 🔒 security-critical
 
-- [ ] `share_token uuid` + `security definer` `get_shared_board(token)` fn
-  (anon-granted, `search_path=''`); migration live + `schema.sql` + types
-- [ ] `/share/[token]` public route (add to `PUBLIC_PATHS`), read-only render,
-  attachments deliberately excluded for v2.0
-- [ ] Share generate/rotate/revoke UI; focused security review of the read path
+- [x] Migration `0002_shareable_board_links.sql` — `boards.share_token uuid
+  unique` + `security definer` `get_shared_board(token)` returning safe
+  read-only JSON (no user_id/attachments/token), `search_path=''`, `revoke from
+  public` + `grant execute to anon, authenticated`. Mirrored in `schema.sql`;
+  `database.types.ts` hand-updated (boards + Functions).
+  **Applied to the live project (`bruzjjsqcmmzptamkhrw`) via the SQL Editor
+  2026-07-16.**
+- [x] `/share/[token]` public route (added to `PUBLIC_PATHS`) — uuid-guarded,
+  calls the RPC, `notFound()` on invalid/revoked/missing (no enumeration),
+  `robots: { index: false }`; `SharedBoardView` renders read-only (no actions,
+  no drag/status/delete, **no attachments**), safe markdown reused from v1.1
+- [x] Share generate/copy/rotate/revoke UI — `ShareBoardModal` + 🔗 button in
+  `BoardList`; `setShareToken`/`revokeShareLink` actions (token via
+  `crypto.randomUUID()`, redundant `user_id` filter on top of RLS)
+- [x] Hardening: `isSafeHttpUrl` guard on the public page's `card.url` render
+  (defense-in-depth vs. legacy `javascript:` rows), added to `board.ts`
+- [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
+- [ ] Verify (auth-gated + browser): signed-out visitor loads a shared board
+  read-only; revoked/rotated token 404s; a focused security review of the
+  definer fn + public route
 
 ### 8.4 — Card-list virtualization · Effort: M · **parked**
 

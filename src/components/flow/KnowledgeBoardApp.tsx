@@ -13,6 +13,7 @@ import BoardList from "./BoardList";
 import TimelinePath from "./TimelinePath";
 import BoardModal from "./BoardModal";
 import DeleteBoardModal from "./DeleteBoardModal";
+import ShareBoardModal from "./ShareBoardModal";
 import CardModal from "./CardModal";
 import CardDetailModal from "./CardDetailModal";
 import DeleteCardModal from "./DeleteCardModal";
@@ -44,6 +45,7 @@ export default function KnowledgeBoardApp({
   const [activeId, setActiveId] = useState(initialBoards[0]?.id ?? "");
   const [modalBoard, setModalBoard] = useState<Board | "new" | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Board | null>(null);
+  const [shareTarget, setShareTarget] = useState<Board | null>(null);
   const [cardModal, setCardModal] = useState<CardWithAttachments | "new" | null>(null);
   const [cardDetail, setCardDetail] = useState<CardWithAttachments | null>(null);
   const [cardDeleteTarget, setCardDeleteTarget] = useState<CardWithAttachments | null>(null);
@@ -229,6 +231,7 @@ export default function KnowledgeBoardApp({
               onNewBoard={() => setModalBoard("new")}
               onEditBoard={setModalBoard}
               onDeleteBoard={setDeleteTarget}
+              onShareBoard={setShareTarget}
             />
             <div className="path-col">
               {tagFilter && (
@@ -288,6 +291,12 @@ export default function KnowledgeBoardApp({
             boards.find((b) => b.id === deleteTarget.id)?.cards.length ?? 0
           }
           onClose={() => setDeleteTarget(null)}
+        />
+      )}
+      {shareTarget && (
+        <ShareBoardModal
+          board={boards.find((b) => b.id === shareTarget.id) ?? shareTarget}
+          onClose={() => setShareTarget(null)}
         />
       )}
       {cardModal && activeBoard && (

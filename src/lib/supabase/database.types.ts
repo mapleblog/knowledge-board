@@ -59,6 +59,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          share_token: string | null
           user_id: string
         }
         Insert: {
@@ -67,6 +68,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          share_token?: string | null
           user_id: string
         }
         Update: {
@@ -75,6 +77,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          share_token?: string | null
           user_id?: string
         }
         Relationships: []
@@ -134,7 +137,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_shared_board: {
+        Args: { share_token: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

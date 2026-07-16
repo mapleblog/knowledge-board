@@ -46,6 +46,21 @@ export function reorderIndex(
  */
 const SECOND_LEVEL_SUFFIXES = new Set(["co", "com", "net", "org", "gov", "edu", "ac"]);
 
+/**
+ * True only for http(s) URLs. Card writes already reject other schemes
+ * (card-actions.ts), but the read side uses this as defense-in-depth before
+ * rendering a stored URL into an `<a href>` — matters most on the public
+ * /share page, where a legacy `javascript:` value would be XSS against viewers.
+ */
+export function isSafeHttpUrl(value: string): boolean {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 /** A short attachment/link chip label, e.g. "🔗 mdn" or "📎 notes.md". */
 export function linkLabel(url: string): string {
   try {

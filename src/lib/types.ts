@@ -63,6 +63,8 @@ export interface Board {
   name: string;
   description: string | null;
   color: BoardColor;
+  /** null = private; a uuid = shared read-only via /share/<token>. */
+  share_token: string | null;
   created_at: string;
 }
 
@@ -98,4 +100,59 @@ export type CardWithAttachments = Card & { attachments: Attachment[] };
 /** A board with its ordered cards + attachments, as rendered on the board view. */
 export interface BoardWithCards extends Board {
   cards: CardWithAttachments[];
+}
+
+/**
+ * The read-only, public-safe projection returned by the `get_shared_board`
+ * RPC (see supabase/schema.sql). Deliberately excludes user_id, share_token,
+ * and attachments — never widen this to leak owner-only data onto share pages.
+ */
+export interface SharedCard {
+  id: string;
+  title: string;
+  description: string | null;
+  url: string | null;
+  status: CardStatus;
+  tags: string[];
+  order_index: number;
+}
+
+export interface SharedBoard {
+  id: string;
+  name: string;
+  color: BoardColor;
+  description: string | null;
+  cards: SharedCard[];
+}
+
+/**
+ * Narrow the untyped `get_shared_board` JSON into a SharedBoard, or null if it
+ * doesn't look like a board (no match, or malformed). Defensive: the RPC is a
+ * trust boundary, so validate its shape rather than casting.
+ */
+export function parseSharedBoard(value: unknown): SharedBoard | null {
+  if (!value || typeof value !== "object") return null;
+  const v = value as Record<string, unknown>;
+  if (typeof v.id !== "string" || typeof v.name !== "string") return null;
+  const rawCards = Array.isArray(v.cards) ? v.cards : [];
+  const cards: SharedCard[] = rawCards.map((raw) => {
+    const c = (raw ?? {}) as Record<string, unknown>;
+    return {
+      id: String(c.id ?? ""),
+      title: String(c.title ?? ""),
+      description: typeof c.description === "string" ? c.description : null,
+      url: typeof c.url === "string" ? c.url : null,
+      status: resolveCardStatus(String(c.status ?? "todo")),
+      tags: Array.isArray(c.tags) ? c.tags.map(String) : [],
+      order_index: typeof c.order_index === "number" ? c.order_index : 0,
+    };
+  });
+  cards.sort((a, b) => a.order_index - b.order_index);
+  return {
+    id: v.id,
+    name: v.name,
+    color: resolveBoardColor(v.color),
+    description: typeof v.description === "string" ? v.description : null,
+    cards,
+  };
 }
