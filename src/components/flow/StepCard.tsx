@@ -14,6 +14,9 @@ type StepCardProps = {
   onOpenDetail: (card: CardWithAttachments) => void;
   onEdit: (card: CardWithAttachments) => void;
   onDelete: (card: CardWithAttachments) => void;
+  onFilterTag: (tag: string) => void;
+  /** Disable drag-reorder (e.g. while a tag filter shows a partial list). */
+  sortDisabled?: boolean;
 };
 
 /**
@@ -28,9 +31,11 @@ export default function StepCard({
   onOpenDetail,
   onEdit,
   onDelete,
+  onFilterTag,
+  sortDisabled = false,
 }: StepCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: card.id });
+    useSortable({ id: card.id, disabled: sortDisabled });
 
   // Attachments are private; fetch a signed URL on click and open it. The blank
   // tab is opened synchronously so the pop-up isn't blocked, then pointed at the
@@ -174,6 +179,21 @@ export default function StepCard({
               disabled={openingId === a.id}
             >
               📎 {openingId === a.id ? "Opening…" : a.file_name}
+            </button>
+          ))}
+          {card.tags.map((tag) => (
+            <button
+              type="button"
+              className="mini tag-chip-action"
+              key={tag}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFilterTag(tag);
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              aria-label={`Filter by tag ${tag}`}
+            >
+              #{tag}
             </button>
           ))}
         </div>

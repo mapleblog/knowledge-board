@@ -383,10 +383,26 @@ links add the app's first public read path (security-critical).
 
 ### 8.2 — Tagging & filtering · Effort: M–L · needs migration
 
-- [ ] `tags text[]` column + GIN index migration (live + mirror `schema.sql` +
-  regenerate types)
-- [ ] Tag input in `CardModal`; server-side normalize + cap (length/count)
-- [ ] Tag display + client-side filter (composes with v1.1 search)
+- [x] `tags text[]` + GIN index migration — written to
+  `supabase/migrations/0001_add_tags_to_cards.sql` + mirrored in `schema.sql`;
+  `database.types.ts` hand-updated (MCP is read-only here, can't apply/regen).
+  **Applied to the live project (`bruzjjsqcmmzptamkhrw`) via the SQL Editor
+  2026-07-16.**
+- [x] Shared tag normalization in `types.ts` (`normalizeTags`/`parseTags`, caps:
+  10 tags/card, 30 chars each — lowercase, trimmed, deduped)
+- [x] Server-side: `createCard`/`updateCard` parse + persist `tags`
+  (authoritative re-normalization; client hidden field is just the source)
+- [x] Tag input in `CardModal` — chip editor (Enter/comma to add, ✕/Backspace to
+  remove, limit-aware hint)
+- [x] Tag display — clickable `#tag` chips on `StepCard` (filter the board),
+  read-only chips in `CardDetailModal`
+- [x] Client-side filter in `KnowledgeBoardApp` (`tagFilter` state, `visibleCards`
+  memo, filter bar with count + Clear); **drag-reorder disabled while filtered**
+  (a partial list would corrupt `order_index`); filter clears on board switch
+- [x] `.tag-*` / `.tag-filter-bar` / `.detail-tags` styling in `globals.css`
+- [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
+- [ ] Browser pass (auth-gated): add tags on a card, filter by a tag, confirm
+  reorder is paused while filtered and resumes after Clear
 
 ### 8.3 — Shareable read-only board links · Effort: L · 🔒 security-critical
 

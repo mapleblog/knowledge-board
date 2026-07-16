@@ -55,6 +55,16 @@ export default function CardDetailModal({
       <h2 id={titleId}>{card.title}</h2>
         <span className={`mini${pill.accent ? " accent" : ""}`}>{pill.label}</span>
 
+        {card.tags.length > 0 && (
+          <div className="detail-tags">
+            {card.tags.map((tag) => (
+              <span className="tag-chip" key={tag}>
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
         {card.description && <Markdown>{card.description}</Markdown>}
 
         {card.url && (

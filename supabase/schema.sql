@@ -33,6 +33,9 @@ create table if not exists public.cards (
   --    of the two cards; the next drag of either card resolves it.
   order_index double precision not null default 0,
   icon        text,
+  -- Free-form labels for filtering. Normalized app-side (lowercase, trimmed,
+  -- deduped, length/count-capped) in src/lib/types.ts + card-actions.ts.
+  tags        text[] not null default '{}',
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
@@ -48,6 +51,8 @@ create table if not exists public.attachments (
 
 create index if not exists cards_board_order_idx
   on public.cards (board_id, order_index);
+create index if not exists cards_tags_gin
+  on public.cards using gin (tags);
 create index if not exists attachments_card_idx
   on public.attachments (card_id);
 

@@ -1016,6 +1016,94 @@ body {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+/* ---- Tags ---- */
+/* Wrapper around the timeline so the filter bar can sit above the path. */
+.surface .path-col {
+  min-width: 0;
+}
+.surface .tag-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+/* Tag editor (card modal): chips + an inline draft input in one box. */
+.surface .tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #f2f3f8;
+  transition: 0.15s;
+}
+.surface .tag-input:focus-within {
+  background: var(--panel);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+.surface .tag-draft {
+  flex: 1;
+  min-width: 100px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--ink);
+}
+.surface .tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel));
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+.surface .tag-chip-x {
+  border: 0;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  padding: 0;
+}
+.surface .tag-chip-x:hover {
+  color: var(--ink);
+}
+/* Clickable tag on a timeline card (a .mini variant) — filters the board. */
+.surface .mini.tag-chip-action {
+  cursor: pointer;
+  border: 0;
+  font-family: var(--font);
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+  color: color-mix(in srgb, var(--accent) 70%, var(--ink));
+}
+.surface .mini.tag-chip-action:hover {
+  background: color-mix(in srgb, var(--accent) 22%, var(--panel));
+}
+.surface .detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
 /* ---- Move card between boards (card detail view) ---- */
 .surface .move-card {
   margin: 14px 0;

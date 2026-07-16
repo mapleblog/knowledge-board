@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ATTACHMENTS_BUCKET } from "@/lib/attachment-constraints";
-import type { CardStatus } from "@/lib/types";
+import { parseTags, type CardStatus } from "@/lib/types";
 
 export type CardActionState = { error?: string } | null;
 
@@ -29,6 +29,7 @@ export async function createCard(
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const url = String(formData.get("url") ?? "").trim();
+  const tags = parseTags(String(formData.get("tags") ?? ""));
 
   if (!boardId) {
     return { error: "Missing board." };
@@ -63,6 +64,7 @@ export async function createCard(
     title,
     description: description || null,
     url: url || null,
+    tags,
     order_index,
   });
 
@@ -82,6 +84,7 @@ export async function updateCard(
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const url = String(formData.get("url") ?? "").trim();
+  const tags = parseTags(String(formData.get("tags") ?? ""));
 
   if (!id) {
     return { error: "Missing card." };
@@ -96,7 +99,7 @@ export async function updateCard(
   const supabase = await createClient();
   const { error } = await supabase
     .from("cards")
-    .update({ title, description: description || null, url: url || null })
+    .update({ title, description: description || null, url: url || null, tags })
     .eq("id", id);
 
   if (error) {

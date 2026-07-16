@@ -48,6 +48,8 @@ export default function KnowledgeBoardApp({
   const [cardDetail, setCardDetail] = useState<CardWithAttachments | null>(null);
   const [cardDeleteTarget, setCardDeleteTarget] = useState<CardWithAttachments | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Active tag filter for the current board (null = show all cards).
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
   // Error from a background write (reorder / status toggle) — those have no
   // form to report into, so they surface here as a dismissible banner.
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -89,6 +91,19 @@ export default function KnowledgeBoardApp({
     () => boards.find((b) => b.id === activeId) ?? boards[0],
     [boards, activeId]
   );
+
+  // Cards shown in the timeline — narrowed to the active tag filter, if any.
+  const visibleCards = useMemo(() => {
+    if (!activeBoard) return [];
+    if (!tagFilter) return activeBoard.cards;
+    return activeBoard.cards.filter((c) => c.tags.includes(tagFilter));
+  }, [activeBoard, tagFilter]);
+
+  // Switching boards clears the filter (a tag rarely carries across boards).
+  function selectBoard(id: string) {
+    setActiveId(id);
+    setTagFilter(null);
+  }
 
   function updateActiveCards(next: CardWithAttachments[]) {
     if (!activeBoard) return;
@@ -178,6 +193,7 @@ export default function KnowledgeBoardApp({
               boards={boards}
               onSelect={(boardId, card) => {
                 setActiveId(boardId);
+                setTagFilter(null);
                 setCardDetail(card);
                 setMenuOpen(false);
               }}
@@ -209,22 +225,43 @@ export default function KnowledgeBoardApp({
             <BoardList
               boards={boards}
               activeId={activeBoard.id}
-              onSelect={setActiveId}
+              onSelect={selectBoard}
               onNewBoard={() => setModalBoard("new")}
               onEditBoard={setModalBoard}
               onDeleteBoard={setDeleteTarget}
             />
-            <TimelinePath
-              boardId={activeBoard.id}
-              title={activeBoard.name}
-              cards={activeBoard.cards}
-              onReorder={handleReorder}
-              onCycleStatus={handleCycleStatus}
-              onAddStep={() => setCardModal("new")}
-              onOpenDetail={setCardDetail}
-              onEditCard={setCardModal}
-              onDeleteCard={setCardDeleteTarget}
-            />
+            <div className="path-col">
+              {tagFilter && (
+                <div className="tag-filter-bar">
+                  <span>
+                    Filtered by <strong>#{tagFilter}</strong> ·{" "}
+                    {visibleCards.length}{" "}
+                    {visibleCards.length === 1 ? "card" : "cards"} · drag-reorder
+                    paused
+                  </span>
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    onClick={() => setTagFilter(null)}
+                  >
+                    Clear filter
+                  </button>
+                </div>
+              )}
+              <TimelinePath
+                boardId={activeBoard.id}
+                title={activeBoard.name}
+                cards={visibleCards}
+                onReorder={handleReorder}
+                onCycleStatus={handleCycleStatus}
+                onAddStep={() => setCardModal("new")}
+                onOpenDetail={setCardDetail}
+                onEditCard={setCardModal}
+                onDeleteCard={setCardDeleteTarget}
+                onFilterTag={setTagFilter}
+                sortDisabled={Boolean(tagFilter)}
+              />
+            </div>
           </div>
         ) : (
           <div className="empty-state">

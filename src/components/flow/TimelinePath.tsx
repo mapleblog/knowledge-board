@@ -30,6 +30,9 @@ type TimelinePathProps = {
   onOpenDetail: (card: CardWithAttachments) => void;
   onEditCard: (card: CardWithAttachments) => void;
   onDeleteCard: (card: CardWithAttachments) => void;
+  onFilterTag: (tag: string) => void;
+  /** True while a tag filter shows a partial list — drag-reorder is disabled. */
+  sortDisabled?: boolean;
 };
 
 /**
@@ -46,6 +49,8 @@ export default function TimelinePath({
   onOpenDetail,
   onEditCard,
   onDeleteCard,
+  onFilterTag,
+  sortDisabled = false,
 }: TimelinePathProps) {
   const sensors = useSensors(
     // A small drag distance keeps card clicks (e.g. the done node) responsive.
@@ -91,6 +96,8 @@ export default function TimelinePath({
               onOpenDetail={onOpenDetail}
               onEdit={onEditCard}
               onDelete={onDeleteCard}
+              onFilterTag={onFilterTag}
+              sortDisabled={sortDisabled}
             />
           ))}
         </SortableContext>

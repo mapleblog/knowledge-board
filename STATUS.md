@@ -135,4 +135,23 @@ only one board); `KnowledgeBoardApp.handleMoveCard` moves the card optimisticall
 auth-gated browser pass (move a card with an attachment + URL, confirm it lands
 at the destination end and its attachment/link survive). Next up: 8.2 Tagging.
 
+**v2.0 — 8.2 Tagging & filtering (2026-07-16, code complete; migration
+applied):** Cards can be tagged and the board filtered by tag. **Migration:**
+adds `cards.tags text[] not null default '{}'` + a `cards_tags_gin` index —
+written to `supabase/migrations/0001_add_tags_to_cards.sql`, mirrored in
+`schema.sql`, and `database.types.ts` hand-updated. **Applied to the live project
+`bruzjjsqcmmzptamkhrw` via the SQL Editor 2026-07-16** (the Supabase MCP connector
+is read-only in this environment — no apply_migration / no read — so it was run
+manually). `page.tsx`
+defaults `tags ?? []` so reads don't crash pre-migration. **Code:** shared
+`normalizeTags`/`parseTags` in `types.ts` (caps: 10 tags/card, 30 chars,
+lowercase/trim/dedupe); `createCard`/`updateCard` parse + persist tags
+(authoritative); `CardModal` chip editor; clickable `#tag` chips on `StepCard`
+(filter the board) + read-only chips in `CardDetailModal`;
+`KnowledgeBoardApp.tagFilter` + `visibleCards` + a filter bar. **Design call:**
+drag-reorder is disabled while a tag filter is active (reordering a partial list
+would corrupt `order_index`); the filter clears on board switch. `tsc` /
+`eslint --max-warnings=0` / `next build` all clean. Remaining: run the migration,
+then an auth-gated browser pass. Next up: 8.3 Shareable links.
+
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.

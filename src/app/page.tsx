@@ -42,6 +42,9 @@ export default async function Home() {
     cards: board.cards.map((card) => ({
       ...card,
       status: resolveCardStatus(card.status),
+      // Defensive: tolerate a row/response without the tags column (e.g. before
+      // the migration is applied) so the board still renders.
+      tags: card.tags ?? [],
     })),
   }));
 

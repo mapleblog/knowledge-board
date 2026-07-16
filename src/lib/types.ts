@@ -30,6 +30,33 @@ export function resolveCardStatus(value: string): CardStatus {
   return value === "in_progress" || value === "done" ? value : "todo";
 }
 
+/** Caps that bound a card's tag array (enforced server-side, see card-actions). */
+export const MAX_TAGS_PER_CARD = 10;
+export const MAX_TAG_LENGTH = 30;
+
+/**
+ * Normalize a raw tag list: trim, lowercase, drop blanks, de-duplicate, cap
+ * each tag's length and the total count. Shared by the client input (so the UI
+ * previews what will be stored) and the server actions (authoritative).
+ */
+export function normalizeTags(raw: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const item of raw) {
+    const tag = item.trim().toLowerCase().slice(0, MAX_TAG_LENGTH);
+    if (!tag || seen.has(tag)) continue;
+    seen.add(tag);
+    out.push(tag);
+    if (out.length >= MAX_TAGS_PER_CARD) break;
+  }
+  return out;
+}
+
+/** Parse a comma/newline-separated tag string into a normalized tag list. */
+export function parseTags(input: string): string[] {
+  return normalizeTags(input.split(/[,\n]/));
+}
+
 export interface Board {
   id: string;
   user_id: string;
@@ -46,6 +73,8 @@ export interface Card {
   description: string | null;
   url: string | null;
   status: CardStatus;
+  /** Free-form labels for filtering; normalized (lowercase, deduped, capped). */
+  tags: string[];
   /** Fractional index used for drag-to-reorder without renumbering every row. */
   order_index: number;
   /** Optional emoji/icon shown on the card thumbnail in the timeline. */

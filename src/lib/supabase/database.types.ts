@@ -88,6 +88,7 @@ export type Database = {
           id: string
           order_index: number
           status: string
+          tags: string[]
           title: string
           updated_at: string
           url: string | null
@@ -100,6 +101,7 @@ export type Database = {
           id?: string
           order_index?: number
           status?: string
+          tags?: string[]
           title: string
           updated_at?: string
           url?: string | null
@@ -112,6 +114,7 @@ export type Database = {
           id?: string
           order_index?: number
           status?: string
+          tags?: string[]
           title?: string
           updated_at?: string
           url?: string | null
