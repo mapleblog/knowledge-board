@@ -175,7 +175,24 @@ drag/status/delete, attachments excluded), reusing the v1.1 safe-markdown render
 revoke) + a 🔗 button in `BoardList`; `setShareToken`/`revokeShareLink` actions
 generate the token via `crypto.randomUUID()` with a redundant `user_id` filter
 on top of RLS. `tsc` / `eslint --max-warnings=0` / `next build` all clean.
-Remaining: run the migration, then a signed-out browser pass + a focused security
-review. Next up: 8.4 is parked; v2.0 built set essentially complete.
+Remaining: run the migration, then a signed-out browser pass. Next up: 8.4 is
+parked; v2.0 built set essentially complete.
+
+**Security review — v2.0 (2026-07-16):** Focused security pass over the v2.0
+diff (`518629a..e244b31`: move cards, tagging, shareable links). **Result: no
+HIGH/MEDIUM-confidence exploitable findings.** Verified: (1) `get_shared_board`
+is `security definer` with `search_path=''` and every object schema-qualified,
+returns only safe read-only fields (no `user_id`/`share_token`/attachments),
+matched on the unguessable uuid token, `revoke from public` + grant to
+`anon`/`authenticated` only — table RLS stays owner-only, no injection (typed
+uuid bind param); (2) `/share/[token]` uuid-guards + `notFound()`s uniformly on
+invalid/revoked/missing (no enumeration), `robots:noindex`; (3) no XSS on the
+public page — React escaping + v1.1 safe markdown (no `rehype-raw`,
+`javascript:` stripped) + `isSafeHttpUrl` guard on `card.url`; (4) `moveCard`/
+`setShareToken`/`revokeShareLink` all do `getUser()` + explicit `user_id` filter
+on top of RLS (no cross-tenant move/share); (5) `proxy.ts` `/share` public-path
+match doesn't over-match (`/shareXYZ` excluded); (6) tags are parameterized +
+normalized server-side. Static review only — the complementary live check is the
+signed-out share round-trip (create → load logged-out → revoke → 404).
 
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.
