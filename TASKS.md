@@ -423,9 +423,16 @@ links add the app's first public read path (security-critical).
 - [x] Hardening: `isSafeHttpUrl` guard on the public page's `card.url` render
   (defense-in-depth vs. legacy `javascript:` rows), added to `board.ts`
 - [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
+- [x] Fix: `/share/<bad-token>` returned HTTP 200 (soft 404) instead of 404 — the
+  root `app/loading.tsx` streamed a Suspense fallback for every route, so the
+  share page's RPC `await` flushed headers (200) before `notFound()` ran. Moved
+  the dashboard `page.tsx` + `loading.tsx` into a `(dashboard)` route group (URL
+  `/` unchanged) so the streaming skeleton is scoped to the dashboard; `/share`
+  now renders non-streamed and returns a real **404** (verified on a local prod
+  server for both malformed and nonexistent tokens; `noindex` meta still present)
 - [ ] Verify (auth-gated + browser): signed-out visitor loads a shared board
-  read-only; revoked/rotated token 404s; a focused security review of the
-  definer fn + public route
+  read-only; revoked/rotated token 404s (status now confirmed 404 via curl); a
+  focused security review of the definer fn + public route
 
 ### 8.4 — Card-list virtualization · Effort: S · **CSS-only, shipped**
 

@@ -194,6 +194,23 @@ designed 10s–100 cards/board scale. `tsc` / `eslint --max-warnings=0` /
 `next build` all clean. This closes the v2.0 built set (8.1–8.4). True JS
 windowing stays a documented build-if-needed follow-up for 500+-card boards.
 
+**v2.0 — 8.3 share route now returns real HTTP 404 (2026-07-16):** A signed-out
+curl pass found `/share/<bad-token>` returned **HTTP 200** (with the `noindex`
+meta) instead of 404 — a "soft 404". Root cause per Next 16's own docs
+(`not-found.md` / `loading.md` "Status Codes"): a **streamed** response can't
+change its status after headers flush, and the root `app/loading.tsx` skeleton
+wrapped every route (incl. `/share`) in a Suspense boundary, so the share page's
+RPC `await` streamed the fallback → 200 before `notFound()` ran. **Fix:** moved
+the dashboard `page.tsx` + `loading.tsx` into a **`(dashboard)` route group** (URL
+`/` unchanged — route groups are path-transparent) so the streaming skeleton is
+scoped to the dashboard only; `/share` now renders non-streamed and
+`notFound()` sets a true **404**. `error.tsx` stays at the app root as the global
+error boundary (error boundaries don't stream, so they don't reintroduce the
+bug). Verified on a local prod server (`next build && next start`): malformed and
+valid-format-nonexistent tokens both now **HTTP 404**, `noindex` meta still
+present, dashboard `/` still 307→`/login` when unauthed, `/login` 200. `tsc` /
+`eslint --max-warnings=0` / `next build` clean.
+
 **Security review — v2.0 (2026-07-16):** Focused security pass over the v2.0
 diff (`518629a..e244b31`: move cards, tagging, shareable links). **Result: no
 HIGH/MEDIUM-confidence exploitable findings.** Verified: (1) `get_shared_board`
