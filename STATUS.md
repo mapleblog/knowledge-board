@@ -91,5 +91,12 @@ Site/Redirect URLs at the Vercel domain. The new project was verified 2026-07-15
 `boards`/`cards`/`attachments` tables + RLS, the private `attachments` storage
 bucket, and all three `storage.objects` policies are present. (Historical
 references to `bawjdscthwgnwcnziawo` below are left intact for provenance.)
+**Resolved 2026-07-16:** the two `NEXT_PUBLIC_SUPABASE_*` env vars were updated
+on Vercel and redeployed. The final open item — repointing Supabase Auth
+Site/Redirect URLs at the live domain — was also done: login was redirecting to
+`http://localhost:3000` (ERR_CONNECTION_REFUSED) because the new project's **Site
+URL** still defaulted to localhost. Setting Site URL to the Vercel domain (and
+allow-listing `<domain>/**` + `http://localhost:3000/**` for redirects) fixed it;
+authenticated dashboard now loads on the live URL. Migration fully complete.
 
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.
