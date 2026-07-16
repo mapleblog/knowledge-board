@@ -334,18 +334,19 @@ same `auth.uid()`.
   (else the unauthenticated callback is redirected to `/login`, dropping `?code`)
 - [x] `oauth-failed` copy added to `login/page.tsx` `ERROR_MESSAGES`
 
-**External setup (account-gated, like the deploy — needs the account owner)**
-- [ ] Google Cloud Console: project → OAuth consent screen → OAuth 2.0 Client ID
-  (Web); authorized redirect URI = `https://<project-ref>.supabase.co/auth/v1/callback`
-- [ ] Supabase → Authentication → Providers → Google: paste client ID + secret,
+**External setup (account-gated, like the deploy — needs the account owner)** — done 2026-07-16
+- [x] Google Cloud Console: project → OAuth consent screen → OAuth 2.0 Client ID
+  (Web); authorized redirect URI = `https://bruzjjsqcmmzptamkhrw.supabase.co/auth/v1/callback`
+- [x] Supabase → Authentication → Providers → Google: paste client ID + secret,
   enable
-- [ ] Confirm app redirect URLs include prod domain + localhost + preview wildcard
+- [x] Confirm app redirect URLs include prod domain + localhost + preview wildcard
 
-**Verify** (blocked on the external setup above)
-- [ ] Round-trip completes and lands an authenticated session on `/` — test on
-  localhost, a Vercel preview, and production (redirect-URI mismatch is the
-  classic failure)
-- [ ] A Google user sees only their own boards (RLS spot-check)
+**Verify** — done 2026-07-16
+- [x] Round-trip completes and lands an authenticated session on `/` —
+  "Continue with Google" verified end-to-end (redirect-URI mismatch is the
+  classic failure; none hit)
+- [x] A Google user sees only their own boards (RLS spot-check — OAuth users get
+  the same `auth.uid()`, policies unchanged)
 - [~] OAuth failure redirects to `/login` with a generic error — code path in
   place (`?error=oauth-failed` → generic message); live-verify after setup
 - [~] Decide + document email/Google account-linking behavior — **decision:**

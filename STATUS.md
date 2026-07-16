@@ -102,4 +102,14 @@ authenticated dashboard now loads on the live URL. Migration fully complete.
 **`knowledge-board-lovat.vercel.app`** — the `knowledge-board-maple.vercel.app`
 in the dated Phase 6 entries above is stale; treat `-lovat` as authoritative.
 
+**v1.1 — 7.3 Google OAuth VERIFIED (2026-07-16):** the external setup is done and
+the round-trip works. Google Cloud OAuth client created (authorized redirect URI
+`https://bruzjjsqcmmzptamkhrw.supabase.co/auth/v1/callback`), Google provider
+enabled in Supabase Auth with the client ID/secret, and Site/Redirect URLs
+allow-list the live domain + localhost. "Continue with Google" was clicked
+end-to-end and landed an authenticated session on `/`. **This completes Phase 7
+(v1.1) — all three features (Search, Markdown, Google OAuth) are now shipped and
+verified.** Remaining open items are the same non-blocking pair as before: the
+leaked-password Auth toggle (Pro-gated) and the deferred v2.0 roadmap.
+
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.
