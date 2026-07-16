@@ -112,4 +112,13 @@ end-to-end and landed an authenticated session on `/`. **This completes Phase 7
 verified.** Remaining open items are the same non-blocking pair as before: the
 leaked-password Auth toggle (Pro-gated) and the deferred v2.0 roadmap.
 
+**v2.0 scoping drafted (2026-07-16):** [`V2.0-SCOPE.md`](V2.0-SCOPE.md) scopes the
+four roadmap items — move cards between boards (M, no migration), tagging +
+filtering (M–L, `tags text[]` + GIN migration), shareable read-only board links
+(L, **security-critical** — first public read path, via a `security definer`
+`get_shared_board(token)` fn + `/share/[token]` route; attachments deliberately
+kept private for v2.0), and card-list virtualization (parked until usage shows
+boards >~100 cards). Recommended order: Move → Tag → Share → (Virtualize if
+needed). Nothing built yet — scoping only.
+
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.
