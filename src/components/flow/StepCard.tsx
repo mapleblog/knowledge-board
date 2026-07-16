@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Attachment, CardWithAttachments } from "@/lib/types";
-import { linkLabel, statusPill } from "@/lib/board";
+import { statusPill } from "@/lib/board";
 import { getAttachmentUrls } from "@/lib/attachment-actions";
 
 type StepCardProps = {
@@ -157,18 +157,6 @@ export default function StepCard({
           <span className={`mini status-${card.status.replace("_", "-")}`}>
             {pill.label}
           </span>
-          {card.url ? (
-            <a
-              className="mini mini-action"
-              href={card.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-            >
-              {linkLabel(card.url)}
-            </a>
-          ) : null}
           {card.attachments.map((a) => (
             <button
               type="button"

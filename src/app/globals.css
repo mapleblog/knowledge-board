@@ -407,6 +407,24 @@ body {
   opacity: 0.55;
   transform: rotate(-1deg) scale(1.01);
 }
+/* v2.0 8.4 — card-list virtualization (CSS-only).
+   Let the browser skip layout/paint for cards scrolled off-screen on long
+   boards. Applied to `.card` (not `.step`) so the timeline rail (`.step::before`,
+   which overflows its box by -4px) is never paint-clipped, and so dnd-kit still
+   measures the fully-rendered `.step` node — all cards stay mounted, so
+   drag-reorder math is unaffected. `contain-intrinsic-size: auto <len>` makes the
+   browser remember each card's real height once rendered and only fall back to
+   the ~140px estimate for cards never yet on-screen, keeping scroll height and
+   the scrollbar stable. No JS, no deps, transparent below the fold. */
+.surface .step .card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 140px;
+}
+/* Never skip the card being dragged: its transform keeps it visually on-screen,
+   but pin it explicitly so measuring/painting can't be deferred mid-drag. */
+.surface .step .card.dragging {
+  content-visibility: visible;
+}
 .surface .card .r {
   display: flex;
   align-items: center;

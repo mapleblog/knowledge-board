@@ -427,10 +427,26 @@ links add the app's first public read path (security-critical).
   read-only; revoked/rotated token 404s; a focused security review of the
   definer fn + public route
 
-### 8.4 — Card-list virtualization · Effort: M · **parked**
+### 8.4 — Card-list virtualization · Effort: S · **CSS-only, shipped**
 
-- [ ] Build only if usage shows boards regularly exceeding ~100 cards (dnd-kit +
-  windowing is the hard part)
+Chose the low-risk **CSS `content-visibility`** path over true JS windowing
+(`@tanstack/react-virtual` + dnd-kit is the hard combo `V2.0-SCOPE.md` flagged;
+deferred unless a real 500+-card board proves it's needed). All cards stay
+mounted, so dnd-kit drag-reorder math is completely unaffected — the browser just
+skips layout/paint for off-screen cards.
+
+- [x] `content-visibility: auto` + `contain-intrinsic-size: auto 140px` on
+  `.surface .step .card` in `globals.css` — applied to `.card` (not `.step`) so
+  the timeline rail (`.step::before`, overflows -4px) is never paint-clipped and
+  dnd-kit still measures the fully-rendered `.step` node
+- [x] `content-visibility: visible` on `.card.dragging` so the dragged card is
+  never deferred mid-drag
+- [x] No new deps, no JS, transparent below the fold; no visual/behavioral change
+  at the designed 10s–100 cards/board scale
+- [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
+- [ ] Optional future: if usage shows boards regularly exceeding ~500 cards and
+  measured jank persists, add true windowing (tanstack + threshold gating +
+  auto-scroll drop-target mounting) on top of this baseline
 
 ---
 

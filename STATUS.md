@@ -178,6 +178,22 @@ on top of RLS. `tsc` / `eslint --max-warnings=0` / `next build` all clean.
 Remaining: run the migration, then a signed-out browser pass. Next up: 8.4 is
 parked; v2.0 built set essentially complete.
 
+**v2.0 — 8.4 Card-list virtualization (2026-07-16, shipped, CSS-only):** Chose
+the low-risk **CSS `content-visibility`** path over JS windowing (`@tanstack/
+react-virtual` + dnd-kit is the hard combo `V2.0-SCOPE.md` flagged — deferred
+unless a real 500+-card board proves it's needed). Added
+`content-visibility: auto` + `contain-intrinsic-size: auto 140px` to
+`.surface .step .card` in `globals.css` so the browser skips layout/paint of
+off-screen cards on long boards. **Applied to `.card`, not `.step`,** so the
+timeline rail (`.step::before`, overflows its box by -4px) is never paint-clipped
+and dnd-kit still measures the fully-rendered `.step` node — **all cards stay
+mounted, so drag-reorder math is unaffected**; `.card.dragging` gets
+`content-visibility: visible` so the dragged card is never deferred mid-drag. No
+new deps, no JS, transparent below the fold, no visual/behavioral change at the
+designed 10s–100 cards/board scale. `tsc` / `eslint --max-warnings=0` /
+`next build` all clean. This closes the v2.0 built set (8.1–8.4). True JS
+windowing stays a documented build-if-needed follow-up for 500+-card boards.
+
 **Security review — v2.0 (2026-07-16):** Focused security pass over the v2.0
 diff (`518629a..e244b31`: move cards, tagging, shareable links). **Result: no
 HIGH/MEDIUM-confidence exploitable findings.** Verified: (1) `get_shared_board`
