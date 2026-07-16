@@ -92,6 +92,36 @@ config (no `vercel.json` required).
      want confirmation links to work on previews too.
 4. **Deploy**, then run the smoke test below.
 
+### Supabase ↔ Vercel configuration (at a glance)
+
+The two services meet at exactly **two touchpoints** — get both right and auth
+works on the live domain:
+
+| Where | Setting | Value | Notes |
+|---|---|---|---|
+| **Vercel** → Settings → Environment Variables | `NEXT_PUBLIC_SUPABASE_URL` | `https://<project-ref>.supabase.co` | Points the app at the Supabase project |
+| **Vercel** → Settings → Environment Variables | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | project anon/public key | Safe to expose (RLS enforces access) |
+| **Supabase** → Auth → URL Configuration | **Site URL** | `https://<your-app>.vercel.app` | Base URL Supabase builds email/OAuth redirects from |
+| **Supabase** → Auth → URL Configuration | **Redirect URLs** | `https://<your-app>.vercel.app/**` + `http://localhost:3000/**` | Allow-list; add `https://<your-app>-*.vercel.app/**` for previews |
+
+**Two gotchas learned the hard way:**
+
+- **`NEXT_PUBLIC_*` vars are inlined into the client bundle at *build time*.**
+  Changing them in the Vercel dashboard has **no effect until you redeploy** — a
+  saved-but-not-redeployed value still ships the old project ref. After editing
+  either variable, trigger a fresh deploy.
+- **A wrong Site URL redirects login to `localhost`.** If **Site URL** still
+  points at `http://localhost:3000`, a successful login on the live site
+  bounces the browser to localhost (`ERR_CONNECTION_REFUSED`). The app's own
+  routes (`auth/confirm`, `auth/callback`) are origin-based and never hardcode a
+  host — so a localhost redirect always means the Supabase **Site URL** is
+  wrong, not the code. Old confirmation emails also encode the old redirect;
+  request a fresh one after fixing it.
+
+> When you switch Supabase projects, both sides move together: update the two
+> `NEXT_PUBLIC_SUPABASE_*` vars **and redeploy**, then repoint the new project's
+> Site URL / Redirect URLs at the Vercel domain.
+
 ### Production smoke test
 
 Sign up → confirm via email → create a board → add a card → open its detail →
