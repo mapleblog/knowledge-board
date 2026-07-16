@@ -8,6 +8,10 @@ Built to the spec in [`docs/prd.md`](docs/prd.md) using the **"Flow"** design
 system in [`docs/DESIGN.md`](docs/DESIGN.md) (reverse-extracted from
 [`docs/mockup.html`](docs/mockup.html)).
 
+> **Live deployment:** [`knowledge-board-lovat.vercel.app`](https://knowledge-board-lovat.vercel.app),
+> backed by Supabase project `bruzjjsqcmmzptamkhrw`. Substitute these wherever
+> the instructions below use `<your-app>` / `<project-ref>` placeholders.
+
 ## Stack
 
 - **Next.js 16 (App Router) + TypeScript**
