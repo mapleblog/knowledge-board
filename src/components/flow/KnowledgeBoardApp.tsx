@@ -8,7 +8,7 @@ import type {
   CardWithAttachments,
 } from "@/lib/types";
 import { reorderIndex } from "@/lib/board";
-import { reorderCard, updateCardStatus } from "@/lib/card-actions";
+import { moveCard, reorderCard, updateCardStatus } from "@/lib/card-actions";
 import BoardList from "./BoardList";
 import TimelinePath from "./TimelinePath";
 import BoardModal from "./BoardModal";
@@ -113,6 +113,31 @@ export default function KnowledgeBoardApp({
       });
     }, REORDER_DEBOUNCE_MS);
     pendingReorders.current.set(movedId, { timeout, orderIndex });
+  }
+
+  function handleMoveCard(card: CardWithAttachments, destBoardId: string) {
+    if (destBoardId === card.board_id) return;
+    // Optimistic: drop the card from its source board and append it to the
+    // destination (its new order_index = that board's current max + 1, mirroring
+    // the server action). A failed write revalidates and snaps this back.
+    setBoards((prev) =>
+      prev.map((b) => {
+        if (b.id === card.board_id) {
+          return { ...b, cards: b.cards.filter((c) => c.id !== card.id) };
+        }
+        if (b.id === destBoardId) {
+          const maxOrder = b.cards.reduce((m, c) => Math.max(m, c.order_index), 0);
+          const moved = { ...card, board_id: destBoardId, order_index: maxOrder + 1 };
+          return { ...b, cards: [...b.cards, moved] };
+        }
+        return b;
+      })
+    );
+    setCardDetail(null);
+    startTransition(async () => {
+      const result = await moveCard(card.id, destBoardId);
+      setSaveError(result?.error ?? null);
+    });
   }
 
   function handleCycleStatus(id: string) {
@@ -238,6 +263,9 @@ export default function KnowledgeBoardApp({
       {cardDetail && (
         <CardDetailModal
           card={cardDetail}
+          moveTargets={boards
+            .filter((b) => b.id !== cardDetail.board_id)
+            .map((b) => ({ id: b.id, name: b.name }))}
           onClose={() => setCardDetail(null)}
           onEdit={() => {
             setCardModal(cardDetail);
@@ -247,6 +275,7 @@ export default function KnowledgeBoardApp({
             setCardDeleteTarget(cardDetail);
             setCardDetail(null);
           }}
+          onMove={(destBoardId) => handleMoveCard(cardDetail, destBoardId)}
         />
       )}
       {cardDeleteTarget && (

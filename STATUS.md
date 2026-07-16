@@ -121,4 +121,18 @@ kept private for v2.0), and card-list virtualization (parked until usage shows
 boards >~100 cards). Recommended order: Move → Tag → Share → (Virtualize if
 needed). Nothing built yet — scoping only.
 
+**v2.0 — 8.1 Move cards between boards (2026-07-16, code complete):** New
+`moveCard(cardId, destBoardId)` server action (`card-actions.ts`) verifies
+destination-board ownership, then repoints `board_id` + appends at
+`max(order_index)+1`. **No migration** — attachments follow via unchanged
+`card_id` (Storage objects are pathed by `card_id`), and RLS already covers both
+sides (update `using` = source ownership, `with check` = destination ownership).
+`CardDetailModal` gained a "Move to board" dropdown (hidden when the user has
+only one board); `KnowledgeBoardApp.handleMoveCard` moves the card optimistically
+(drop from source, append to destination, close modal) and snaps back via the
+`.save-error` banner on failure. `.move-card`/`.move-row` styles added.
+`tsc` / `eslint --max-warnings=0` / `next build` all clean. Remaining: an
+auth-gated browser pass (move a card with an attachment + URL, confirm it lands
+at the destination end and its attachment/link survive). Next up: 8.2 Tagging.
+
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.

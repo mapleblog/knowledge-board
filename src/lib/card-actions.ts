@@ -162,6 +162,60 @@ export async function reorderCard(id: string, orderIndex: number): Promise<CardA
   return null;
 }
 
+/**
+ * Moves a card to another of the user's boards, appended to that board's end.
+ * The card's attachments follow automatically — they reference `card_id`
+ * (unchanged) and their Storage objects are pathed by `card_id`, so nothing in
+ * Storage moves. RLS already guards both sides (the update's `using` checks the
+ * source board's ownership and its `with check` the destination's); the explicit
+ * destination-ownership read below gives a clean error and the next order_index.
+ */
+export async function moveCard(cardId: string, destBoardId: string): Promise<CardActionState> {
+  if (!cardId || !destBoardId) {
+    return { error: "Missing card or destination board." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "You must be signed in." };
+  }
+
+  const { data: destBoard } = await supabase
+    .from("boards")
+    .select("id")
+    .eq("id", destBoardId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!destBoard) {
+    return { error: "Destination board not found." };
+  }
+
+  const { data: last } = await supabase
+    .from("cards")
+    .select("order_index")
+    .eq("board_id", destBoardId)
+    .order("order_index", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const order_index = (last?.order_index ?? 0) + 1;
+
+  const { error } = await supabase
+    .from("cards")
+    .update({ board_id: destBoardId, order_index })
+    .eq("id", cardId);
+
+  // Revalidate even on failure so the optimistic client move snaps back.
+  revalidatePath("/");
+
+  if (error) {
+    return { error: "Could not move the card. Please try again." };
+  }
+  return null;
+}
+
 export async function updateCardStatus(
   id: string,
   status: CardStatus

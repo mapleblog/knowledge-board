@@ -358,6 +358,51 @@ same `auth.uid()`.
 
 ---
 
+## Phase 8 — v2.0 (PRD §5 Roadmap; scoped in [`V2.0-SCOPE.md`](V2.0-SCOPE.md))
+
+Four items. **Recommended build order: Move cards → Tagging → Shareable links →
+Virtualization.** Unlike v1.1, three of the four touch the DB schema; shareable
+links add the app's first public read path (security-critical).
+
+### 8.1 — Move cards between boards · Effort: M · no migration
+
+- [x] `moveCard(cardId, destBoardId)` server action (`card-actions.ts`) —
+  verifies destination-board ownership, appends at `max(order_index)+1`, updates
+  `board_id` + `order_index`. RLS enforces source (update `using`) and
+  destination (`with check`) ownership; attachments follow via unchanged
+  `card_id` (Storage objects are pathed by `card_id`, so nothing moves)
+- [x] "Move to board" selector in `CardDetailModal.tsx` (dropdown of the user's
+  other boards + Move button; hidden when the user has only one board)
+- [x] Optimistic move in `KnowledgeBoardApp.tsx` (`handleMoveCard`): drop from
+  source, append to destination, close the detail modal; failure revalidates and
+  snaps back via the existing `.save-error` banner
+- [x] `.move-card` / `.move-row` styling in `globals.css`
+- [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
+- [ ] Browser pass (auth-gated): move a card with an attachment + URL to another
+  board, confirm it lands at the end and its attachment/link survive
+
+### 8.2 — Tagging & filtering · Effort: M–L · needs migration
+
+- [ ] `tags text[]` column + GIN index migration (live + mirror `schema.sql` +
+  regenerate types)
+- [ ] Tag input in `CardModal`; server-side normalize + cap (length/count)
+- [ ] Tag display + client-side filter (composes with v1.1 search)
+
+### 8.3 — Shareable read-only board links · Effort: L · 🔒 security-critical
+
+- [ ] `share_token uuid` + `security definer` `get_shared_board(token)` fn
+  (anon-granted, `search_path=''`); migration live + `schema.sql` + types
+- [ ] `/share/[token]` public route (add to `PUBLIC_PATHS`), read-only render,
+  attachments deliberately excluded for v2.0
+- [ ] Share generate/rotate/revoke UI; focused security review of the read path
+
+### 8.4 — Card-list virtualization · Effort: M · **parked**
+
+- [ ] Build only if usage shows boards regularly exceeding ~100 cards (dnd-kit +
+  windowing is the hard part)
+
+---
+
 ## Post-MVP (deferred — PRD §5 Roadmap)
 
 - **v1.1:** Google OAuth · markdown in descriptions · search across a user's
