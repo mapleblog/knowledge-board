@@ -37,6 +37,30 @@ Tick the boxes as you go, then hand the results back so `TASKS.md` and
 
 ---
 
+## Optional: run sections A–C automatically
+
+[`scripts/verify-v2.mjs`](scripts/verify-v2.mjs) drives sections A, B and C in a
+headless browser. Playwright is **not** a dependency of this project — install
+it ad hoc so the app's dependency tree stays unchanged:
+
+```bash
+npm i --no-save playwright && npx playwright install chromium
+npm run build && npm start          # prod server, NOT npm run dev
+BASE_URL=http://localhost:3000 TM_EMAIL=... TM_PASSWORD=... node scripts/verify-v2.mjs
+```
+
+It creates its own `E2E-<stamp>` fixtures (two boards, two cards, a 1×1 PNG
+attachment, a share token) and deletes them in a `finally` block, pass or fail;
+existing boards are never touched. There is no separate test database, so the
+fixtures land in whatever Supabase project the server points at — prefer a local
+server over the live domain. Pass credentials via the environment only.
+
+Section D below is not automated either way. Tick the tables by hand if you'd
+rather do the whole pass manually — the script is a convenience, not the
+source of truth.
+
+---
+
 ## A — 8.1 Move cards between boards
 
 | # | Step | Expected | ✓/✗ |
