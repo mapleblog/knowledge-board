@@ -285,4 +285,37 @@ It cannot be automated in this environment: no browser-driver tool is available
 and the Supabase MCP connector is permission-denied for this project (it only
 lists the `npwpdoxdhunryisrjval` org).
 
+**v2.0 — script-verifiable half of the 8.1–8.3 pass DONE; checklist written
+(2026-07-23, `d1dba41` + `538df84`):** Re-ran every check that can be automated
+in this environment, against a fresh local prod server (`next build` +
+`next start`) and the live project `bruzjjsqcmmzptamkhrw`. **Static gate clean:**
+`tsc --noEmit`, `eslint --max-warnings=0`, `next build` (Next 16.2.10, 7 routes
+incl. `/share/[token]`). **Both migrations re-confirmed live:**
+`cards?select=tags` and `boards?select=share_token` return `[]` (not 42703), and
+`get_shared_board` is anon-callable. **RPC hardening re-checked:** nonexistent,
+nil **and NULL** tokens all return `null` — private boards (default
+`share_token IS NULL`) are not exposed; an omitted arg gets PGRST202 (no no-arg
+overload to abuse); `' or 1=1--` is rejected as HTTP 400 `invalid input syntax
+for type uuid`, i.e. at the type boundary before any SQL runs. **Anon `select *`
+on `boards`/`cards`/`attachments` all return `[]`** (RLS holds for the anonymous
+role). **Signed-out HTTP sweep:** `/` 307→`/login`, `/login` 200, `/signup` 200,
+`/shareXYZ` 307 (no over-match), `/share` 404, and every bad token — malformed,
+nonexistent uuid, nil uuid, uuid+extra chars, encoded path traversal,
+injection-shaped — returns **404** with `<meta name="robots" content="noindex">`
+intact. **New static finding (defense-in-depth, worth recording):**
+`parseSharedBoard` (`src/lib/types.ts`) does not cast the RPC result — it
+rebuilds a whitelisted object field by field, so `user_id` / `share_token` /
+attachments could not reach the public view even if the SQL projection were
+widened later. That's a second independent barrier behind the definer function.
+**Still outstanding — only the auth-gated, interactive steps**, now written out
+as a tickable checklist in [`VERIFY-V2.md`](VERIFY-V2.md) (referenced from the
+matching boxes in `TASKS.md`): section A = move a card with an attachment + URL,
+section B = tags + filter with reorder paused, section C = the **valid-token**
+share round-trip incl. rotate/revoke (the bad-token half is done, see above),
+section D = the 7.1 phone-viewport search pass + confirming the OAuth
+link-by-verified-email Auth setting. These need a real browser and a live
+session: there is no browser-driver tool here and the Supabase MCP connector is
+permission-denied for this project. 8.1/8.2/8.3 stay **unticked** in `TASKS.md`
+until that pass runs — the script half alone is not sufficient to call them done.
+
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.
