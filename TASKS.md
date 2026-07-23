@@ -287,7 +287,8 @@ Google Cloud + Supabase config). No DB migrations for any of the three.
 - [x] Results styling in `globals.css` (`.card-search*`, `<mark>` highlight,
   mobile full-width panel)
 - [~] Verify on a phone-sized viewport (input in the hamburger menu) — CSS done
-  (full-width input + panel ≤520px); live browser pass still worth doing (auth-gated)
+  (full-width input + panel ≤520px); live browser pass still worth doing
+  (auth-gated) — **section D of [`VERIFY-V2.md`](VERIFY-V2.md)**
 - [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
 
 ### 7.2 — Markdown in card descriptions · Effort: S–M
@@ -364,6 +365,13 @@ Four items. **Recommended build order: Move cards → Tagging → Shareable link
 Virtualization.** Unlike v1.1, three of the four touch the DB schema; shareable
 links add the app's first public read path (security-critical).
 
+All code (8.1–8.4) is landed and both migrations are live. Every remaining
+unchecked box below is a **manual, auth-gated browser check** — they can't be
+automated in this environment (no browser driver; the Supabase MCP connector is
+read-only for this project). They're written out step by step in
+[`VERIFY-V2.md`](VERIFY-V2.md), which also records what was already verified by
+script on 2026-07-23 so it isn't repeated.
+
 ### 8.1 — Move cards between boards · Effort: M · no migration
 
 - [x] `moveCard(cardId, destBoardId)` server action (`card-actions.ts`) —
@@ -379,7 +387,8 @@ links add the app's first public read path (security-critical).
 - [x] `.move-card` / `.move-row` styling in `globals.css`
 - [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
 - [ ] Browser pass (auth-gated): move a card with an attachment + URL to another
-  board, confirm it lands at the end and its attachment/link survive
+  board, confirm it lands at the end and its attachment/link survive —
+  **section A of [`VERIFY-V2.md`](VERIFY-V2.md)**
 
 ### 8.2 — Tagging & filtering · Effort: M–L · needs migration
 
@@ -404,7 +413,8 @@ links add the app's first public read path (security-critical).
 - [x] `.tag-*` / `.tag-filter-bar` / `.detail-tags` styling in `globals.css`
 - [x] `tsc` / `eslint --max-warnings=0` / `next build` clean
 - [ ] Browser pass (auth-gated): add tags on a card, filter by a tag, confirm
-  reorder is paused while filtered and resumes after Clear
+  reorder is paused while filtered and resumes after Clear —
+  **section B of [`VERIFY-V2.md`](VERIFY-V2.md)**
 
 ### 8.3 — Shareable read-only board links · Effort: L · 🔒 security-critical
 
@@ -437,7 +447,10 @@ links add the app's first public read path (security-critical).
   server for both malformed and nonexistent tokens; `noindex` meta still present)
 - [ ] Verify (auth-gated + browser): signed-out visitor loads a shared board
   read-only; revoked/rotated token 404s (status now confirmed 404 via curl); a
-  focused security review of the definer fn + public route
+  focused security review of the definer fn + public route —
+  **section C of [`VERIFY-V2.md`](VERIFY-V2.md)**. Only the *valid-token* path
+  is left: the bad-token 404 sweep, the anon-RLS reads and the RPC NULL-token
+  check were all script-verified 2026-07-23 (recorded in that file)
 
 ### 8.4 — Card-list virtualization · Effort: S · **CSS-only, shipped**
 
