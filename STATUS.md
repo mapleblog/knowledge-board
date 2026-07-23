@@ -228,4 +228,23 @@ match doesn't over-match (`/shareXYZ` excluded); (6) tags are parameterized +
 normalized server-side. Static review only — the complementary live check is the
 signed-out share round-trip (create → load logged-out → revoke → 404).
 
+**Docs — CLAUDE.md refreshed (2026-07-23, `45339ee`, pushed to `origin/main`):**
+Ran `/init` over the repo and rewrote `CLAUDE.md` around the existing workflow
+rules (doc map, triggers, Hard Constraints kept verbatim). **Added:** the
+build/lint/typecheck commands plus the project's real verification standard —
+**no test framework exists**, so the gate is `tsc --noEmit` +
+`eslint --max-warnings=0` + `next build`, then a manual (auth-gated) browser
+pass, with status codes checked on `build && start` not `dev`; the
+hand-applied-migration + hand-maintained `database.types.ts` workflow; and a
+big-picture architecture section (server fetch → single client shell → Server
+Actions + `revalidatePath`, RLS as the boundary with `get_shared_board` as the
+only public read path, fractional `order_index` + per-card debounce, the
+signed-upload/storage-delete ordering rule, the `(dashboard)` route group's
+soft-404 purpose, `globals.css` as the design system). **Restored** the binding
+AGENTS.md Next.js-16 rule as an explicit note (the `@AGENTS.md` import had been
+dropped). **Fixed doc paths:** every rule now points at the real locations under
+`docs/` (`prd.md`, `DESIGN.md`, `wireframe.html`, `themes.html`, `mockup.html`);
+working docs (`TASKS.md`, `STATUS.md`, `*-AUDIT.md`) stay at root, and the note
+records that `finalize.md` was never created for this project. No code touched.
+
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.
