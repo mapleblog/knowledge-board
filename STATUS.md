@@ -247,4 +247,42 @@ dropped). **Fixed doc paths:** every rule now points at the real locations under
 working docs (`TASKS.md`, `STATUS.md`, `*-AUDIT.md`) stay at root, and the note
 records that `finalize.md` was never created for this project. No code touched.
 
+**v2.0 — 8.1–8.3 browser pass ATTEMPTED, BLOCKED (2026-07-23): the 0001 and 0002
+migrations were never applied to the live project.** Ran the signed-out half of
+the pass against a local prod server (`next build && next start -p 3100`, clean
+build) plus direct anon REST probes at `bruzjjsqcmmzptamkhrw`. **Finding:**
+Postgres reports `column cards.tags does not exist` (42703) and
+`column boards.share_token does not exist` (42703), and the RPC
+`get_shared_board` returns PGRST202 "function not found". The
+"Applied to the live project via the SQL Editor 2026-07-16" claims for 8.2 and
+8.3 in this file and in `TASKS.md` are therefore **incorrect** — corrected in
+place. **Live impact (not just a test blocker):** reads are safe
+(`page.tsx` selects `*` and defaults `tags ?? []`), but `createCard` and
+`updateCard` both send a `tags` column in the write payload, so **card create and
+card edit currently fail against the live DB**; share-link creation fails too.
+`moveCard` (8.1) touches only `board_id`/`order_index` and is unaffected.
+**Verified anyway (signed-out, real HTTP):** `/share/<malformed>`,
+`/share/<nonexistent-uuid>`, over-long uuid, encoded path traversal, and a
+quoted SQL-injection token **all return 404** with `<meta name="robots"
+content="noindex">`; `/shareXYZ` does not over-match (307 → `/login`); `/` 307 →
+`/login`; `/login` 200. Anon direct table reads on `boards`/`cards` return `[]`
+(RLS holds for the anonymous role). **RESOLVED same day (2026-07-23):** both migrations
+were pasted into the SQL Editor of `bruzjjsqcmmzptamkhrw` as one combined block
+(the first attempt had silently no-opped — most likely a partial text selection,
+since the SQL Editor runs only the highlighted text when a selection exists).
+In-editor verification returned `has_cards_tags=true`, `has_share_token=true`,
+`get_shared_board(uuid)`; the live anon REST re-probe agrees —
+`cards?select=tags` and `boards?select=share_token` both return `[]` instead of
+42703, and the RPC is anon-callable (HTTP 200). **Extra security check that
+passed:** calling the RPC with `share_token: null` returns `null`, not a board —
+SQL `=` never matches NULL, so private boards (the default `share_token IS
+NULL`) are not exposed by a null/omitted token. Re-ran the `/share` status
+sweep with the RPC genuinely live: malformed, nonexistent-uuid, nil-uuid and
+SQL-injection-shaped tokens **all 404** with the `noindex` meta intact.
+**Still outstanding — the interactive, auth-gated click-through for 8.1/8.2/8.3**
+(valid-token happy path, tag filter + reorder pause, move-with-attachment).
+It cannot be automated in this environment: no browser-driver tool is available
+and the Supabase MCP connector is permission-denied for this project (it only
+lists the `npwpdoxdhunryisrjval` org).
+
 **Note (unrelated to attachments):** `get_advisors` had flagged two pre-existing, non-blocking security warnings. (1) `public.touch_updated_at` mutable `search_path` — **fixed 2026-07-03**: pinned empty via live migration `pin_search_path_on_touch_updated_at`, mirrored in `supabase/schema.sql`, and confirmed gone from the advisor report. (2) Leaked-password protection disabled in Auth — **deferred 2026-07-14: confirmed Pro-gated** (the "Prevent use of leaked passwords" toggle under Authentication → Sign In / Providers → Passwords requires the Supabase Pro plan; greyed out on Free). Dashboard-only, no API/SQL surface to automate. Non-blocking hardening item; enable after upgrading to Pro.

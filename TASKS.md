@@ -386,8 +386,10 @@ links add the app's first public read path (security-critical).
 - [x] `tags text[]` + GIN index migration — written to
   `supabase/migrations/0001_add_tags_to_cards.sql` + mirrored in `schema.sql`;
   `database.types.ts` hand-updated (MCP is read-only here, can't apply/regen).
-  **Applied to the live project (`bruzjjsqcmmzptamkhrw`) via the SQL Editor
-  2026-07-16.**
+  **Applied to the live project (`bruzjjsqcmmzptamkhrw`) 2026-07-23**, and
+  confirmed by anon REST probe (`cards?select=tags` → `[]`, not 42703). The
+  earlier 2026-07-16 "applied" note was wrong — the first paste never committed;
+  card create/edit had been failing live until this landed.
 - [x] Shared tag normalization in `types.ts` (`normalizeTags`/`parseTags`, caps:
   10 tags/card, 30 chars each — lowercase, trimmed, deduped)
 - [x] Server-side: `createCard`/`updateCard` parse + persist `tags`
@@ -411,8 +413,11 @@ links add the app's first public read path (security-critical).
   read-only JSON (no user_id/attachments/token), `search_path=''`, `revoke from
   public` + `grant execute to anon, authenticated`. Mirrored in `schema.sql`;
   `database.types.ts` hand-updated (boards + Functions).
-  **Applied to the live project (`bruzjjsqcmmzptamkhrw`) via the SQL Editor
-  2026-07-16.**
+  **Applied to the live project (`bruzjjsqcmmzptamkhrw`) 2026-07-23** (same
+  correction as 8.2 — the 2026-07-16 note was wrong). Confirmed live:
+  `to_regprocedure('public.get_shared_board(uuid)')` resolves, `boards
+  ?select=share_token` → `[]`, and the RPC is anon-callable returning `null`
+  for a nonexistent token.
 - [x] `/share/[token]` public route (added to `PUBLIC_PATHS`) — uuid-guarded,
   calls the RPC, `notFound()` on invalid/revoked/missing (no enumeration),
   `robots: { index: false }`; `SharedBoardView` renders read-only (no actions,
